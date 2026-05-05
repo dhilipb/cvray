@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model UserProfile {
+  id               String   @id @default(cuid())
+  name             String
+  email            String?
+  originalCvText   String?  
+  parsedProfileJson String?  // Stored as JSON string
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  JobApplications  JobApplication[]
+}
+
+model JobApplication {
+  id              String   @id @default(cuid())
+  company         String
+  role            String
+  status          String   @default("Saved") // Saved, Applied, Interview, Rejected
+  appliedAt       DateTime @default(now())
+  url             String?
+  jobDescription  String?
+  tweakedCvJson   String?  // The version of the CV applied with
+  
+  userProfileId   String
+  userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+}
