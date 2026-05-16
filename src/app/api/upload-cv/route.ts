@@ -18,9 +18,16 @@ export async function POST(req: NextRequest) {
     let text = '';
     if (file.type === 'application/pdf') {
       // Dynamic import to avoid build-time issues with pdf-parse
-      const pdf = (await import('pdf-parse')).default;
-      // @ts-ignore - pdf-parse types can be tricky with dynamic imports
-      const data = await pdf(buffer);
+      const pdfModule = await import('pdf-parse');
+      // @ts-ignore - The package might have different export structures
+      const PDFParse = pdfModule.PDFParse || (pdfModule.default && pdfModule.default.PDFParse);
+      
+      if (!PDFParse) {
+        throw new Error('Failed to load PDF parser');
+      }
+
+      const parser = new PDFParse({ data: buffer });
+      const data = await parser.getText();
       text = data.text;
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       const result = await mammoth.extractRawText({ buffer });
