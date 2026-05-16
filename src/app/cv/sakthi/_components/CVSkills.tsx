@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 import { styles } from '../_styles';
-import type { SkillCategory } from '../_types/cv';
+import type { SkillCategory } from '@/lib/types';
 import { renderText } from '../_utils/renderText';
 
 /* --------- CVSkills Component --------- */

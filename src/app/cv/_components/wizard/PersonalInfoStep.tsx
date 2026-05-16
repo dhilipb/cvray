@@ -1,5 +1,5 @@
 import { TextField, Grid, Typography, Box } from '@mui/material';
-import { CVData } from '../../_types/cv';
+import { CVData } from '@/lib/types';
 
 interface Props {
 	data: CVData;

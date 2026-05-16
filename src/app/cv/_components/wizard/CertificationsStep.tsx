@@ -1,6 +1,6 @@
 import { TextField, Typography, Box, Button, IconButton, Paper, Grid } from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
-import { CVData, Certification } from '../../_types/cv';
+import { CVData, Certification } from '@/lib/types';
 
 interface Props {
 	data: CVData;

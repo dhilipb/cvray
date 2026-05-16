@@ -1,116 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mammoth from 'mammoth';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateObject } from 'ai';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { cvSchema } from '@/lib/schemas/cv';
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File;
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    let text = '';
-    if (file.type === 'application/pdf') {
-      // Dynamic import to avoid build-time issues with pdf-parse
-      const pdfModule = await import('pdf-parse');
-      // @ts-ignore - The package might have different export structures
-      const PDFParse = pdfModule.PDFParse || (pdfModule.default && pdfModule.default.PDFParse);
-      
-      if (!PDFParse) {
-        throw new Error('Failed to load PDF parser');
-      }
-
-      const parser = new PDFParse({ data: buffer });
-      const data = await parser.getText();
-      text = data.text;
-    } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      const result = await mammoth.extractRawText({ buffer });
-      text = result.value;
-    } else {
-      // For text files or others, just read as text
-      text = new TextDecoder().decode(bytes);
-    }
-
-    if (!text) {
-      return NextResponse.json({ error: 'Failed to extract text from file' }, { status: 400 });
-    }
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-    const prompt = `
-      You are an expert CV parser. Extract the following information from the provided CV text and return it strictly as a JSON object.
-      
-      The JSON structure must match this interface:
-      interface WorkExperience {
-        role: string;
-        company: string;
-        client: string;
-        dates: string;
-        bulletPoints: string[];
-      }
-      interface SkillCategory {
-        name: string;
-        items: string;
-      }
-      interface Education {
-        degree: string;
-        institution: string;
-        location: string;
-        details?: string;
-      }
-      interface Certification {
-        name: string;
-        date: string;
-      }
-      interface CVData {
-        name: string;
-        title: string;
-        email: string;
-        phone: string;
-        location?: string;
-        linkedin?: string;
-        summary: string;
-        skills: SkillCategory[];
-        experience: WorkExperience[];
-        education: Education[];
-        certifications: Certification[];
-        other: {
-          label: string;
-          value: string;
-        };
-      }
-
-      CV Text:
-      ${text}
-
-      Return ONLY the JSON object. Do not include any markdown formatting like \`\`\`json.
-    `;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const parsedText = response.text().trim();
-    
-    // Clean up potential markdown if Gemini included it despite instructions
-    const jsonString = parsedText.replace(/^```json\n?/, '').replace(/\n?```$/, '');
-    
-    let parsedJson;
-    try {
-      parsedJson = JSON.parse(jsonString);
-    } catch (e) {
-      console.error('Failed to parse Gemini response as JSON:', parsedText);
-      return NextResponse.json({ error: 'AI returned invalid JSON format', raw: parsedText }, { status: 500 });
-    }
+    const file = formData.get('file') as File | null;
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
 
     // Get session to associate profile with user
-    const { getServerSession } = await import('next-auth/next');
-    const { authOptions } = await import('@/lib/auth');
     const session = await getServerSession(authOptions);
 
     if (!session?.user || !(session.user as any).id) {
@@ -119,8 +23,66 @@ export async function POST(req: NextRequest) {
 
     const userId = (session.user as any).id;
 
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
+    if (!file) {
+      // Create empty profile if no file
+      const emptyJson = {
+        name: name || "New Profile",
+        title: "",
+        email: "",
+        phone: "",
+        summary: "",
+        skills: [],
+        experience: [],
+        education: [],
+        certifications: [],
+        fullText: ""
+      };
+      
+      // @ts-ignore
+      const userProfile = await prisma.userProfile.create({
+        data: {
+          name: emptyJson.name,
+          description: description,
+          email: null,
+          originalCvText: "",
+          parsedProfileJson: JSON.stringify(emptyJson),
+          userId: userId,
+        },
+      });
+
+      return NextResponse.json({ success: true, profile: userProfile });
+    }
+
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Configure Google provider directly to support PDF
+    const google = createGoogleGenerativeAI({
+      apiKey: process.env.GEMINI_API_KEY || '',
+    });
+
+    // Use generateObject for structured extraction
+    const { object: parsedJson } = await generateObject({
+      model: google('gemini-1.5-flash'), // Use gemini-1.5-flash which supports PDF
+      schema: cvSchema,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { 
+              type: 'text', 
+              text: `You are an expert CV parser. Extract all information from the provided CV. 
+                     Also, extract the full text content accurately and put it in the "fullText" field.` 
+            },
+            {
+              type: 'file',
+              data: buffer,
+              mimeType: file.type,
+            },
+          ],
+        },
+      ],
+    });
 
     // Save to database
     // @ts-ignore
@@ -129,7 +91,7 @@ export async function POST(req: NextRequest) {
         name: name || parsedJson.name || 'Unknown',
         description: description,
         email: parsedJson.email,
-        originalCvText: text,
+        originalCvText: parsedJson.fullText || '',
         parsedProfileJson: JSON.stringify(parsedJson),
         userId: userId,
       },

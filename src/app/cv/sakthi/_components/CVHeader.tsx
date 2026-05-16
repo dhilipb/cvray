@@ -1,6 +1,6 @@
 import { Link, Text, View } from '@react-pdf/renderer';
 import { styles } from '../_styles';
-import type { CVData } from '../_types/cv';
+import type { CVData } from '@/lib/types';
 
 /* --------- CVHeader Component --------- */
 

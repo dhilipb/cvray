@@ -1,6 +1,6 @@
 import { Text, View } from '@react-pdf/renderer';
 import { COLORS, styles } from '../_styles';
-import type { Certification, Education } from '../_types/cv';
+import type { Certification, Education } from '@/lib/types';
 
 /* --------- CVEducation Component --------- */
 

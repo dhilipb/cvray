@@ -1,3 +1,5 @@
+/* --------- CV Related Types --------- */
+
 export interface WorkExperience {
 	role: string;
 	company: string;
@@ -38,7 +40,7 @@ export interface CVData {
 	education: Education[];
 	certifications: Certification[];
 	coverLetter?: string;
-	other: {
+	other?: {
 		label: string;
 		value: string;
 	};

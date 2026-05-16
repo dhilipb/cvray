@@ -12,7 +12,7 @@ import {
 	Typography,
 	Divider,
 } from '@mui/material';
-import { CVData } from './_types/cv';
+import { CVData } from '@/lib/types';
 import { PersonalInfoStep } from './_components/wizard/PersonalInfoStep';
 import { SummaryStep } from './_components/wizard/SummaryStep';
 import { SkillsStep } from './_components/wizard/SkillsStep';

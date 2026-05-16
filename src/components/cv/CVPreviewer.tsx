@@ -9,11 +9,12 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { CVData, WorkExperience } from "@/lib/types";
 
 interface CVPreviewerProps {
   open: boolean;
   onClose: () => void;
-  cvData?: any; // To be typed properly later based on actual CV interface
+  cvData?: CVData;
   jobContext?: string;
 }
 
@@ -104,7 +105,7 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
                 </Typography>
 
                 <Typography variant="h6" sx={{ fontWeight: 600, color: "#222", mb: 1 }}>Experience</Typography>
-                {cvData.experience?.map((exp: any, idx: number) => (
+                {cvData.experience?.map((exp: WorkExperience, idx: number) => (
                   <Box key={idx} sx={{ mb: 3 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#222" }}>{exp.role} - {exp.company}</Typography>
                     <Typography variant="body2" sx={{ color: "#555", mb: 1 }}>{exp.dates}</Typography>

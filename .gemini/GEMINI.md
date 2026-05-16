@@ -23,7 +23,21 @@
 - **Dynamic PDF Generation:** Built-in CV viewing and PDF generation using `@react-pdf/renderer`.
 
 ## Tech Implementation Details
-- **CV Parsing:** Handled via `/api/upload-cv`. Uses `pdf-parse` for PDFs and `mammoth` for DOCX.
-- **AI Engine:** Google Gemini (`gemini-1.5-flash`) is used to extract and structure CV data.
+- **CV Parsing:** Handled via `/api/upload-cv`. Uses Vercel AI SDK (`ai` and `@ai-sdk/openai`) via OpenRouter to send files directly to Gemini Flash for multi-modal processing and structured data extraction.
+- **AI Engine:** OpenRouter Gemini Flash (`google/gemini-2.5-flash`) is used to extract and structure CV data via `generateObject`.
 - **Database:** Prisma with SQLite/LibSQL. Schema includes standard NextAuth models (`User`, `Account`, `Session`) linked to `UserProfile`.
 - **Theme:** "Obsidian & Neon" aesthetic implemented via MUI Theme and custom glassmorphism overrides.
+
+## Coding Standards & Maintenance
+- **Self-Updating Documentation:** This file (`.gemini/GEMINI.md`) must be updated whenever new significant features, requirements, or architectural changes are introduced.
+- **Modularity:** Code must be modular. Keep components and functions focused and decoupled.
+- **Type Safety:** Strictly avoid using `any`. Use descriptive types and interfaces.
+- **File Size:** If a file exceeds 250 lines, it must be split into smaller, logical components or modules.
+- **Organization:** Maintain a clean project structure with well-named files and folders. Use subfolders to group related logic.
+- **UI Components:** Never use native `alert()`. Always use Material UI (MUI) components, specifically `MUI Alert` for notifications.
+
+## Development Workflow
+- **Gemini Dev Hook:** This project uses a custom Webpack plugin (`scripts/gemini-webpack-plugin.mjs`) registered in `next.config.mjs`. 
+- **How it works:** Every time you run `yarn dev`, the server is automatically "hooked". If a compilation error occurs, Gemini will automatically launch in an interactive session to help you fix it.
+- **Opt-out:** To run the dev server without Gemini, use `SKIP_GEMINI=1 yarn dev`.
+

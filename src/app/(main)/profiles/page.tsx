@@ -77,16 +77,13 @@ export default function ProfilesPage() {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      alert("Please select a CV file");
-      return;
-    }
-
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("name", newName);
+      if (selectedFile) {
+        formData.append("file", selectedFile);
+      }
+      formData.append("name", newName || "New Profile");
       formData.append("description", newDescription);
 
       const res = await fetch("/api/upload-cv", {
@@ -269,27 +266,49 @@ export default function ProfilesPage() {
             
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Base CV / Resume</Typography>
-              <Button
-                component="label"
-                variant="outlined"
-                fullWidth
-                startIcon={<CloudUploadIcon />}
-                sx={{ 
-                  py: 4, 
-                  borderStyle: "dashed", 
-                  borderColor: selectedFile ? "#10b981" : "rgba(255,255,255,0.2)",
-                  bgcolor: selectedFile ? "rgba(16,185,129,0.05)" : "transparent",
-                  "&:hover": { borderColor: "#10b981" }
-                }}
-              >
-                {selectedFile ? selectedFile.name : "Click to upload or drag and drop (PDF, DOCX, TXT)"}
-                <input
-                  type="file"
-                  hidden
-                  accept=".pdf,.docx,.txt"
-                  onChange={handleFileChange}
-                />
-              </Button>
+              {!selectedFile ? (
+                <Button
+                  component="label"
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ 
+                    py: 4, 
+                    borderStyle: "dashed", 
+                    borderColor: "rgba(255,255,255,0.2)",
+                    bgcolor: "transparent",
+                    "&:hover": { borderColor: "#10b981" }
+                  }}
+                >
+                  Click to upload or drag and drop (PDF, DOCX, TXT)
+                  <input
+                    type="file"
+                    hidden
+                    accept=".pdf,.docx,.txt"
+                    onChange={handleFileChange}
+                  />
+                </Button>
+              ) : (
+                <Box sx={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "space-between",
+                  p: 2, 
+                  border: "1px solid #10b981", 
+                  borderRadius: 1,
+                  bgcolor: "rgba(16,185,129,0.05)"
+                }}>
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <CloudUploadIcon sx={{ color: "#10b981", mr: 2 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>
+                      {selectedFile.name}
+                    </Typography>
+                  </Box>
+                  <IconButton size="small" onClick={() => setSelectedFile(null)} sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+              )}
             </Box>
           </Box>
         </DialogContent>
@@ -299,7 +318,7 @@ export default function ProfilesPage() {
           </Button>
           <Button
             variant="contained"
-            disabled={uploading || !selectedFile}
+            disabled={uploading}
             onClick={handleUpload}
             sx={{ 
               background: "linear-gradient(to right, #10b981 0%, #059669 100%)", 

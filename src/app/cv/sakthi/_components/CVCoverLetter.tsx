@@ -1,6 +1,6 @@
 import { Document, Page, Text, View } from '@react-pdf/renderer';
 import { COLORS, styles } from '../_styles';
-import type { CVData } from '../_types/cv';
+import type { CVData } from '@/lib/types';
 import { renderText } from '../_utils/renderText';
 import { CVHeader } from './CVHeader';
 

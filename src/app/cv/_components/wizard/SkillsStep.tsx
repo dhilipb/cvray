@@ -1,6 +1,6 @@
 import { TextField, Typography, Box, Button, IconButton, Stack, Paper } from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
-import { CVData, SkillCategory } from '../../_types/cv';
+import { CVData, SkillCategory } from '@/lib/types';
 
 interface Props {
 	data: CVData;

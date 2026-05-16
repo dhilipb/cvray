@@ -1,4 +1,4 @@
-import type { CVData } from '../_types/cv';
+import type { CVData } from '@/lib/types';
 
 export const cvData: CVData = {
 	name: 'Sakthi Buddha',
