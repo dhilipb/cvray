@@ -1,24 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { generateObject } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import { cvSchema } from '@/lib/schemas/cv';
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { cvSchema } from "@/lib/schemas/cv";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateObject } from "ai";
+import { getServerSession } from "next-auth/next";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File | null;
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
+    const file = formData.get("file") as File | null;
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
 
     // Get session to associate profile with user
     const session = await getServerSession(authOptions);
 
     if (!session?.user || !(session.user as any).id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = (session.user as any).id;
@@ -35,10 +34,9 @@ export async function POST(req: NextRequest) {
         experience: [],
         education: [],
         certifications: [],
-        fullText: ""
+        fullText: "",
       };
-      
-      // @ts-ignore
+
       const userProfile = await prisma.userProfile.create({
         data: {
           name: emptyJson.name,
@@ -58,26 +56,31 @@ export async function POST(req: NextRequest) {
 
     // Configure Google provider directly to support PDF
     const google = createGoogleGenerativeAI({
-      apiKey: process.env.GEMINI_API_KEY || '',
+      apiKey: process.env.GEMINI_API_KEY || "",
     });
 
     // Use generateObject for structured extraction
     const { object: parsedJson } = await generateObject({
-      model: google('gemini-1.5-flash'), // Use gemini-1.5-flash which supports PDF
+      model: google("gemini-2.5-flash"),
       schema: cvSchema,
       messages: [
         {
-          role: 'user',
+          role: "user",
           content: [
-            { 
-              type: 'text', 
-              text: `You are an expert CV parser. Extract all information from the provided CV. 
-                     Also, extract the full text content accurately and put it in the "fullText" field.` 
+            {
+              type: "text",
+              text: `You are an expert CV parser. Analyze the provided CV document and extract all professional information accurately into the specified structure.
+
+                     Please ensure:
+                     1. The 'fullText' field contains the complete, unabridged text extracted from the document.
+                     2. Experience is broken down into specific roles with detailed bullet points.
+                     3. Skills are categorized appropriately.
+                     4. All contact information (email, phone, location) is captured correctly.`,
             },
             {
-              type: 'file',
+              type: "file",
               data: buffer,
-              mimeType: file.type,
+              mediaType: file.type,
             },
           ],
         },
@@ -85,13 +88,12 @@ export async function POST(req: NextRequest) {
     });
 
     // Save to database
-    // @ts-ignore
     const userProfile = await prisma.userProfile.create({
       data: {
-        name: name || parsedJson.name || 'Unknown',
+        name: name || parsedJson.name || "Unknown",
         description: description,
         email: parsedJson.email,
-        originalCvText: parsedJson.fullText || '',
+        originalCvText: parsedJson.fullText || "",
         parsedProfileJson: JSON.stringify(parsedJson),
         userId: userId,
       },
@@ -99,7 +101,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, profile: userProfile });
   } catch (error: any) {
-    console.error('CV Upload Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error("CV Upload Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server error" },
+      { status: 500 },
+    );
   }
 }

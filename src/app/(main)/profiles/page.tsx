@@ -10,7 +10,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import { useRouter } from "next/navigation";
-import { Profile } from "@/lib/types";
+import { Profile, CVData } from "@/lib/types";
 
 import CVPreviewer from "@/components/cv/CVPreviewer";
 
@@ -20,7 +20,7 @@ export default function ProfilesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedProfileData, setSelectedProfileData] = useState<any>(null);
+  const [selectedProfileData, setSelectedProfileData] = useState<CVData | undefined>(undefined);
 
   /* --------- Create Profile Dialog State --------- */
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -28,6 +28,7 @@ export default function ProfilesPage() {
   const [newDescription, setNewDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProfiles();
@@ -67,6 +68,7 @@ export default function ProfilesPage() {
   };
 
   const handleCreateProfile = () => {
+    setDialogError(null);
     setCreateDialogOpen(true);
   };
 
@@ -79,6 +81,7 @@ export default function ProfilesPage() {
   const handleUpload = async () => {
     try {
       setUploading(true);
+      setDialogError(null);
       const formData = new FormData();
       if (selectedFile) {
         formData.append("file", selectedFile);
@@ -100,11 +103,11 @@ export default function ProfilesPage() {
         // Redirect to the edit page for the new profile
         router.push(`/profiles/${data.profile.id}/edit`);
       } else {
-        alert(data.error || "Upload failed");
+        setDialogError(data.error || "Upload failed");
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred during upload");
+      setDialogError("An error occurred during upload");
     } finally {
       setUploading(false);
     }
@@ -244,6 +247,7 @@ export default function ProfilesPage() {
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          {dialogError && <Alert severity="error" sx={{ mb: 3 }}>{dialogError}</Alert>}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 1 }}>
             <TextField
               label="Profile Name"
@@ -335,7 +339,6 @@ export default function ProfilesPage() {
       <CVPreviewer 
         open={previewOpen} 
         onClose={() => setPreviewOpen(false)} 
-        // @ts-ignore - We need to update CVPreviewer to accept data directly or handle this
         cvData={selectedProfileData} 
       />
     </Box>

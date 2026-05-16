@@ -10,7 +10,8 @@ export function OtherInfoStep({ data, updateData }: Props) {
 	const handleOtherChange = (field: 'label' | 'value', value: string) => {
 		updateData({
 			other: {
-				...data.other,
+				label: data.other?.label || '',
+				value: data.other?.value || '',
 				[field]: value,
 			},
 		});
@@ -29,7 +30,7 @@ export function OtherInfoStep({ data, updateData }: Props) {
 					<TextField
 						fullWidth
 						label="Label (e.g., Right to Work)"
-						value={data.other.label}
+						value={data.other?.label || ''}
 						onChange={(e) => handleOtherChange('label', e.target.value)}
 						variant="outlined"
 					/>
@@ -38,7 +39,7 @@ export function OtherInfoStep({ data, updateData }: Props) {
 					<TextField
 						fullWidth
 						label="Value (e.g., No sponsorship required)"
-						value={data.other.value}
+						value={data.other?.value || ''}
 						onChange={(e) => handleOtherChange('value', e.target.value)}
 						variant="outlined"
 					/>

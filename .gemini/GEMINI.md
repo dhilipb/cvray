@@ -23,8 +23,8 @@
 - **Dynamic PDF Generation:** Built-in CV viewing and PDF generation using `@react-pdf/renderer`.
 
 ## Tech Implementation Details
-- **CV Parsing:** Handled via `/api/upload-cv`. Uses Vercel AI SDK (`ai` and `@ai-sdk/openai`) via OpenRouter to send files directly to Gemini Flash for multi-modal processing and structured data extraction.
-- **AI Engine:** OpenRouter Gemini Flash (`google/gemini-2.5-flash`) is used to extract and structure CV data via `generateObject`.
+- **CV Parsing:** Handled via `/api/upload-cv`. Uses Vercel AI SDK (`ai` and `@ai-sdk/google`) to send files directly to Gemini Flash for multi-modal processing and structured data extraction.
+- **AI Engine:** Google Gemini Flash (`gemini-1.5-flash`) is used to extract and structure CV data via `generateObject`, using the `GEMINI_API_KEY`.
 - **Database:** Prisma with SQLite/LibSQL. Schema includes standard NextAuth models (`User`, `Account`, `Session`) linked to `UserProfile`.
 - **Theme:** "Obsidian & Neon" aesthetic implemented via MUI Theme and custom glassmorphism overrides.
 

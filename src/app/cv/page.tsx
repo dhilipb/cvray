@@ -189,8 +189,8 @@ export default function CVWizardPage() {
 				return (
 					<Box>
 						<Typography variant="h6" gutterBottom>Preview JSON</Typography>
-						<Paper sx={{ p: 2, bgcolor: '#f5f5f5', overflow: 'auto', maxHeight: '400px' }}>
-							<pre>{JSON.stringify(cvData, null, 2)}</pre>
+						<Paper sx={{ p: 2, bgcolor: 'background.default', overflow: 'auto', maxHeight: '400px', border: '1px solid rgba(255,255,255,0.05)' }}>
+							<pre style={{ margin: 0, fontSize: '0.8rem', color: '#10b981' }}>{JSON.stringify(cvData, null, 2)}</pre>
 						</Paper>
 					</Box>
 				);

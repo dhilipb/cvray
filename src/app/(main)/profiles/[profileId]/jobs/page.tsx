@@ -33,6 +33,7 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   const [openNewJob, setOpenNewJob] = useState(false);
   const [newJobData, setNewJobData] = useState({ company: "", role: "", jobDescription: "", url: "" });
   const [creating, setCreating] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
   
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
@@ -63,6 +64,7 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   const handleCreateJob = async () => {
     try {
       setCreating(true);
+      setDialogError(null);
       const res = await fetch(`/api/profiles/${profileId}/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,13 +74,14 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
       if (data.success) {
         setOpenNewJob(false);
         setNewJobData({ company: "", role: "", jobDescription: "", url: "" });
+        setDialogError(null);
         fetchJobs(); // Refresh list
       } else {
-        alert(data.error || "Failed to create job");
+        setDialogError(data.error || "Failed to create job");
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred");
+      setDialogError("An error occurred");
     } finally {
       setCreating(false);
     }
@@ -114,7 +117,7 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => setOpenNewJob(true)}
+          onClick={() => { setDialogError(null); setOpenNewJob(true); }}
           sx={{
             background: "linear-gradient(to right, #10b981 0%, #059669 100%)",
             color: "#fff",
@@ -136,7 +139,7 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
           <Typography variant="h6" color="text.secondary" gutterBottom>
             No job applications tracked yet
           </Typography>
-          <Button variant="outlined" color="primary" onClick={() => setOpenNewJob(true)} startIcon={<AddIcon />}>
+          <Button variant="outlined" color="primary" onClick={() => { setDialogError(null); setOpenNewJob(true); }} startIcon={<AddIcon />}>
             Track your first job
           </Button>
         </Box>
@@ -201,6 +204,7 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
       <Dialog open={openNewJob} onClose={() => setOpenNewJob(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { bgcolor: "background.paper", backgroundImage: "none" } } }}>
         <DialogTitle sx={{ fontWeight: 600 }}>Track & Tailor New Application</DialogTitle>
         <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          {dialogError && <Alert severity="error" sx={{ mb: 3 }}>{dialogError}</Alert>}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 1 }}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 6 }}>
