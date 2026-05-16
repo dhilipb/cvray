@@ -1,37 +1,85 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
-  engineType = "library"
 }
 
 datasource db {
   provider = "sqlite"
 }
 
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  userProfiles  UserProfile[]
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 model UserProfile {
-  id               String   @id @default(cuid())
-  name             String
-  email            String?
-  originalCvText   String?  
-  parsedProfileJson String?  // Stored as JSON string
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  JobApplications  JobApplication[]
+  id                String           @id @default(cuid())
+  name              String
+  description       String?
+  email             String?
+  originalCvText    String?
+  parsedProfileJson String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  userId            String
+  JobApplications   JobApplication[]
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model JobApplication {
-  id              String   @id @default(cuid())
-  company         String
-  role            String
-  status          String   @default("Saved") // Saved, Applied, Interview, Rejected
-  appliedAt       DateTime @default(now())
-  url             String?
-  jobDescription  String?
-  tweakedCvJson   String?  // The version of the CV applied with
-  
-  userProfileId   String
-  userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  id             String      @id @default(cuid())
+  company        String
+  role           String
+  status         String      @default("Saved")
+  appliedAt      DateTime    @default(now())
+  url            String?
+  jobDescription String?
+  tweakedCvJson  String?
+  userProfileId  String
+  userProfile    UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 }

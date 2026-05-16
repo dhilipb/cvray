@@ -1,12 +1,15 @@
 # CVRay
 
-A Next.js application for rendering and managing CVs and Cover Letters, with support for PDF generation and headhunter mode.
+A Next.js application for rendering and managing CVs and Cover Letters, with support for PDF generation and AI-powered tailoring.
 
 ## Tech Stack
 
 - **Framework:** Next.js (App Router)
+- **Authentication:** NextAuth.js (Google OAuth)
+- **Database:** Prisma with LibSQL/SQLite
 - **UI Components:** Material UI (MUI)
 - **PDF Rendering:** @react-pdf/renderer
+- **AI:** Google Gemini
 - **Language:** TypeScript
 
 ## Getting Started
@@ -14,29 +17,42 @@ A Next.js application for rendering and managing CVs and Cover Letters, with sup
 First, install the dependencies:
 
 ```bash
-yarn install
+pnpm install
+```
+
+Set up your environment variables by copying `.env.example` to `.env` and filling in the values:
+
+```bash
+cp .env.example .env
+```
+
+Sync the database:
+
+```bash
+npx prisma db push
 ```
 
 Then, run the development server:
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3344](http://localhost:3344) with your browser to see the result.
 
 ## Features
 
-- **Premium Dashboard UI:** Enhanced Material UI dashboard with glassmorphism, responsive sidebar, and smooth micro-animations.
-- **Upload Base CV:** Upload your existing CV (PDF, DOCX) and let Gemini AI parse and structure your data automatically.
-- **PDF Preview:** View CVs and Cover Letters directly in the browser.
-- **Headhunter Mode:** Toggle between personal and candidate views.
-- **PDF Download:** Download CVs and Cover Letters as PDF files.
-- **Dynamic Fonts:** Support for custom fonts in PDF generation.
+- **Google Authentication:** Secure sign-in using Google OAuth.
+- **Profiles-First Architecture:** Focused on managing multiple professional profiles.
+- **AI CV Tailoring:** Upload base CV and let Gemini AI parse and structure your data automatically for specific roles.
+- **Premium UI:** "Obsidian & Neon" aesthetic with glassmorphism, responsive layouts, and smooth micro-animations.
+- **PDF Preview & Export:** View and download high-quality PDFs of your tailored CVs.
 
 ## Project Structure
 
 - `src/app`: Next.js pages and API routes.
-- `src/app/dashboard`: Premium user dashboard and layout.
-- `src/app/cv/sakthi`: Main CV page and its components.
-- `src/app/api/cv/sakthi/pdf`: API route for generating PDF files.
+- `src/app/(main)`: Main application area (profiles, jobs).
+- `src/app/api/auth`: NextAuth authentication routes.
+- `src/lib`: Core utilities (Prisma client, Auth config).
+- `src/components`: Reusable UI components.
+- `prisma`: Database schema and migrations.

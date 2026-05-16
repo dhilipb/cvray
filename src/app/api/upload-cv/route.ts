@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(req: NextRequest) {
   try {
+    const { PDFParse } = await import('pdf-parse');
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -20,7 +18,8 @@ export async function POST(req: NextRequest) {
 
     let text = '';
     if (file.type === 'application/pdf') {
-      const data = await pdf(buffer);
+      const parser = new PDFParse({ data: buffer });
+      const data = await parser.getText();
       text = data.text;
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       const result = await mammoth.extractRawText({ buffer });
@@ -34,6 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to extract text from file' }, { status: 400 });
     }
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `
@@ -100,13 +100,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'AI returned invalid JSON format', raw: parsedText }, { status: 500 });
     }
 
+    // Get session to associate profile with user
+    const { getServerSession } = await import('next-auth/next');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || !(session.user as any).id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id;
+
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+
     // Save to database
+    // @ts-ignore
     const userProfile = await prisma.userProfile.create({
       data: {
-        name: parsedJson.name || 'Unknown',
+        name: name || parsedJson.name || 'Unknown',
+        description: description,
         email: parsedJson.email,
         originalCvText: text,
         parsedProfileJson: JSON.stringify(parsedJson),
+        userId: userId,
       },
     });
 
