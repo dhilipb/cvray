@@ -121,7 +121,7 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
               size="small"
               sx={{ bgcolor: "#10b981", "&:hover": { bgcolor: "#059669" } }}
             >
-              Export PDF
+              Download CV
             </Button>
             <IconButton onClick={onClose} sx={{ ml: 1 }}>
               <CloseIcon />

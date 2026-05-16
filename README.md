@@ -62,6 +62,7 @@ Open [http://localhost:3344](http://localhost:3344) with your browser to see the
 - **Google Authentication:** Secure sign-in using Google OAuth.
 - **Profiles-First Architecture:** Focused on managing multiple professional profiles.
 - **AI CV Tailoring:** Upload base CV and let Gemini AI parse and structure your data automatically for specific roles.
+- **Job Tracking & Management:** Keep track of applications with status updates, search, filtering, and sorting capabilities.
 - **Premium UI:** "Obsidian & Neon" aesthetic with glassmorphism, responsive layouts, and smooth micro-animations.
 - **PDF Preview & Export:** View and download high-quality PDFs of your tailored CVs.
 

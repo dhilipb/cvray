@@ -192,18 +192,19 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
   }
 
   return (
-    <Box sx={{ pb: 10 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
-        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-          <IconButton onClick={() => router.push("/profiles")} sx={{ color: "text.secondary" }}>
-            <ArrowBackIcon />
+    <Box sx={{ pb: 4 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+          <IconButton onClick={() => router.push("/profiles")} sx={{ color: "text.secondary", p: 0.5 }}>
+            <ArrowBackIcon fontSize="small" />
           </IconButton>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: "text.primary" }}>
             Edit Profile
           </Typography>
         </Stack>
         <Button
           variant="outlined"
+          size="small"
           startIcon={<VisibilityIcon />}
           onClick={() => setPreviewOpen(true)}
           sx={{ borderColor: "rgba(255,255,255,0.2)", color: "text.primary" }}
@@ -213,29 +214,30 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 4 }}>
+        <Alert severity="error" sx={{ mb: 2, py: 0 }}>
           {error}
         </Alert>
       )}
       {success && (
-        <Alert severity="success" sx={{ mb: 4 }}>
+        <Alert severity="success" sx={{ mb: 2, py: 0 }}>
           Profile saved successfully!
         </Alert>
       )}
 
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         {/* Left Column - Meta & Info */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Stack spacing={4}>
+          <Stack spacing={2}>
             <Card sx={{ bgcolor: "background.paper", borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+              <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
                   Profile Identity
                 </Typography>
-                <Stack spacing={3}>
+                <Stack spacing={2}>
                   <TextField
                     label="Internal Profile Name"
                     fullWidth
+                    size="small"
                     value={profileName}
                     onChange={(e) => setProfileName(e.target.value)}
                     helperText="Visible only to you in the dashboard"
@@ -243,8 +245,9 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                   <TextField
                     label="Profile Overview"
                     fullWidth
+                    size="small"
                     multiline
-                    rows={4}
+                    rows={2}
                     value={profileDescription}
                     onChange={(e) => setProfileDescription(e.target.value)}
                     helperText="High-level description of this professional persona"
@@ -254,38 +257,43 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
             </Card>
 
             <Card sx={{ bgcolor: "background.paper", borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+              <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
                   Contact Information
                 </Typography>
-                <Stack spacing={3}>
+                <Stack spacing={2}>
                   <TextField
                     label="Full Name (on CV)"
                     fullWidth
+                    size="small"
                     value={cvData.name}
                     onChange={(e) => handlePersonalChange("name", e.target.value)}
                   />
                   <TextField
                     label="Professional Title"
                     fullWidth
+                    size="small"
                     value={cvData.title}
                     onChange={(e) => handlePersonalChange("title", e.target.value)}
                   />
                   <TextField
                     label="Email"
                     fullWidth
+                    size="small"
                     value={cvData.email}
                     onChange={(e) => handlePersonalChange("email", e.target.value)}
                   />
                   <TextField
                     label="Phone"
                     fullWidth
+                    size="small"
                     value={cvData.phone}
                     onChange={(e) => handlePersonalChange("phone", e.target.value)}
                   />
                   <TextField
                     label="Location"
                     fullWidth
+                    size="small"
                     value={cvData.location || ""}
                     onChange={(e) => handlePersonalChange("location", e.target.value)}
                   />
@@ -297,17 +305,18 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
 
         {/* Right Column - Experience & Skills */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Stack spacing={4}>
+          <Stack spacing={2}>
             {/* Professional Summary */}
             <Card sx={{ bgcolor: "background.paper", borderRadius: 2 }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+              <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
                   Professional Summary
                 </Typography>
                 <TextField
                   fullWidth
                   multiline
-                  rows={6}
+                  size="small"
+                  rows={4}
                   value={cvData.summary}
                   onChange={(e) => handlePersonalChange("summary", e.target.value)}
                 />
@@ -321,10 +330,10 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  mb: 2,
+                  mb: 1,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   Work Experience
                 </Typography>
                 <Button
@@ -332,12 +341,12 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                   variant="outlined"
                   size="small"
                   onClick={addExperience}
-                  sx={{ color: "#10b981", borderColor: "rgba(16,185,129,0.5)" }}
+                  sx={{ color: "#10b981", borderColor: "rgba(16,185,129,0.5)", py: 0 }}
                 >
                   Add Role
                 </Button>
               </Box>
-              <Stack spacing={3}>
+              <Stack spacing={1.5}>
                 {cvData.experience.map((exp, expIdx) => (
                   <Card
                     key={expIdx}
@@ -347,16 +356,16 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                       border: "1px solid rgba(255,255,255,0.05)",
                     }}
                   >
-                    <CardContent>
+                    <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                       <Box
                         sx={{
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "flex-start",
-                          mb: 3,
+                          mb: 1.5,
                         }}
                       >
-                        <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+                        <Grid container spacing={1.5} sx={{ flexGrow: 1 }}>
                           <Grid size={{ xs: 12, sm: 6 }}>
                             <TextField
                               label="Role / Title"
@@ -404,6 +413,7 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                           </Grid>
                           <Grid size={{ xs: 12 }}>
                             <FormControlLabel
+                              sx={{ m: 0 }}
                               control={
                                 <Switch
                                   size="small"
@@ -415,7 +425,7 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                                 />
                               }
                               label={
-                                <Typography variant="caption">
+                                <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
                                   Force Page Break Before This Role
                                 </Typography>
                               }
@@ -426,21 +436,21 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                           color="error"
                           size="small"
                           onClick={() => removeExperience(expIdx)}
-                          sx={{ ml: 2 }}
+                          sx={{ ml: 1, p: 0.5 }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Box>
 
                       <Typography
-                        variant="subtitle2"
-                        sx={{ mb: 1, fontWeight: 600, color: "text.secondary" }}
+                        variant="caption"
+                        sx={{ mb: 0.5, display: "block", fontWeight: 600, color: "text.secondary" }}
                       >
                         Responsibilities & Achievements
                       </Typography>
-                      <Stack spacing={1}>
+                      <Stack spacing={0.5}>
                         {exp.bulletPoints.map((bp, bpIdx) => (
-                          <Box key={bpIdx} sx={{ display: "flex", gap: 1 }}>
+                          <Box key={bpIdx} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                             <TextField
                               fullWidth
                               multiline
@@ -451,15 +461,16 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                               }
                               variant="standard"
                               sx={{
-                                "& .MuiInput-root": { fontSize: "0.875rem" },
+                                "& .MuiInput-root": { fontSize: "0.8rem" },
                                 "& .MuiInput-root:before": { borderColor: "rgba(255,255,255,0.1)" },
                               }}
                             />
                             <IconButton
                               size="small"
                               onClick={() => removeBulletPoint(expIdx, bpIdx)}
+                              sx={{ p: 0.5 }}
                             >
-                              <DeleteIcon fontSize="inherit" />
+                              <DeleteIcon sx={{ fontSize: "1rem" }} />
                             </IconButton>
                           </Box>
                         ))}
@@ -467,7 +478,13 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                           size="small"
                           startIcon={<AddIcon />}
                           onClick={() => addBulletPoint(expIdx)}
-                          sx={{ alignSelf: "flex-start", mt: 1, color: "text.secondary" }}
+                          sx={{
+                            alignSelf: "flex-start",
+                            mt: 0.5,
+                            color: "text.secondary",
+                            fontSize: "0.7rem",
+                            py: 0,
+                          }}
                         >
                           Add Point
                         </Button>
@@ -485,10 +502,10 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  mb: 2,
+                  mb: 1,
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   Skills & Expertise
                 </Typography>
                 <Button
@@ -496,12 +513,12 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                   variant="outlined"
                   size="small"
                   onClick={addSkillCategory}
-                  sx={{ color: "#10b981", borderColor: "rgba(16,185,129,0.5)" }}
+                  sx={{ color: "#10b981", borderColor: "rgba(16,185,129,0.5)", py: 0 }}
                 >
                   Add Category
                 </Button>
               </Box>
-              <Grid container spacing={3}>
+              <Grid container spacing={1.5}>
                 {cvData.skills.map((skill, skillIdx) => (
                   <Grid size={{ xs: 12, sm: 6 }} key={skillIdx}>
                     <Card
@@ -511,13 +528,13 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                         border: "1px solid rgba(255,255,255,0.05)",
                       }}
                     >
-                      <CardContent>
+                      <CardContent sx={{ p: 1.5, "&:last-child": { pb: 1.5 } }}>
                         <Box
                           sx={{
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "flex-start",
-                            mb: 2,
+                            mb: 1,
                           }}
                         >
                           <TextField
@@ -527,11 +544,13 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                             value={skill.name}
                             onChange={(e) => handleSkillChange(skillIdx, "name", e.target.value)}
                             variant="standard"
+                            sx={{ "& .MuiInput-root": { fontSize: "0.9rem", fontWeight: 600 } }}
                           />
                           <IconButton
                             color="error"
                             size="small"
                             onClick={() => removeSkillCategory(skillIdx)}
+                            sx={{ p: 0.5 }}
                           >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
@@ -540,11 +559,12 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                           label="Skills (comma separated)"
                           fullWidth
                           multiline
-                          rows={3}
+                          rows={2}
                           size="small"
                           value={skill.items}
                           onChange={(e) => handleSkillChange(skillIdx, "items", e.target.value)}
                           placeholder="Java, Python, AWS, Docker..."
+                          sx={{ "& .MuiInputBase-root": { fontSize: "0.8rem" } }}
                         />
                       </CardContent>
                     </Card>

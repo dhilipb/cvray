@@ -22,12 +22,32 @@ import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useRouter } from "next/navigation";
-import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { AIChatAssistant } from "./_components/AIChatAssistant";
 import { CVData } from "@/lib/types";
 import dynamic from "next/dynamic";
-import { CVPdfDocument, CoverLetterPdfDocument } from "@/components/cv/CVPdfDocument";
+import {
+  ClassicCV, ClassicCoverLetter,
+  ModernCV, ModernCoverLetter,
+  MinimalistCV, MinimalistCoverLetter,
+  ProfessionalCV, ProfessionalCoverLetter,
+  CreativeCV, CreativeCoverLetter,
+} from "@/components/cv/templates";
+import StyleIcon from "@mui/icons-material/Style";
+import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import CropFreeIcon from "@mui/icons-material/CropFree";
+import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
+import ColorLensIcon from "@mui/icons-material/ColorLens";
+
+const TEMPLATES = {
+  classic: { id: "classic", name: "Classic", cv: ClassicCV, coverLetter: ClassicCoverLetter, icon: HistoryEduIcon },
+  modern: { id: "modern", name: "Modern", cv: ModernCV, coverLetter: ModernCoverLetter, icon: AutoAwesomeIcon },
+  minimalist: { id: "minimalist", name: "Minimalist", cv: MinimalistCV, coverLetter: MinimalistCoverLetter, icon: CropFreeIcon },
+  professional: { id: "professional", name: "Professional", cv: ProfessionalCV, coverLetter: ProfessionalCoverLetter, icon: BusinessCenterIcon },
+  creative: { id: "creative", name: "Creative", cv: CreativeCV, coverLetter: CreativeCoverLetter, icon: ColorLensIcon },
+};
+
+type TemplateId = keyof typeof TEMPLATES;
 
 const PDFViewer = dynamic(() => import("@react-pdf/renderer").then((mod) => mod.PDFViewer), {
   ssr: false,
@@ -180,58 +200,9 @@ export default function JobCVPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
+  const [templateId, setTemplateId] = useState<TemplateId>("classic");
 
-  const [chatInput, setChatInput] = useState("");
   const [localCvData, setLocalCvData] = useState<CVData | null>(null);
-
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: "/api/chat",
-        body: () => ({
-          jobId,
-          profileId,
-          cvData: localCvData,
-          jobDescription: job?.jobDescription,
-        }),
-      }),
-    [jobId, profileId, localCvData, job?.jobDescription],
-  );
-
-  const { messages, sendMessage, status } = useChat({
-    transport,
-    onToolCall: async ({ toolCall }) => {
-      if (toolCall.toolName === "updateCV") {
-        const newCvData = toolCall.input as CVData;
-        setLocalCvData(newCvData);
-      }
-      if (toolCall.toolName === "updateCoverLetter") {
-        const { content } = toolCall.input as { content: string };
-        setLocalCvData((prev) => (prev ? { ...prev, coverLetter: content } : null));
-      }
-    },
-    messages: [
-      {
-        id: "1",
-        role: "assistant",
-        parts: [
-          {
-            type: "text",
-            text: "Hi! I'm your AI CV assistant. I can help you tailor your CV and cover letter for this specific role. What would you like to change?",
-          },
-        ],
-      },
-    ] as UIMessage[],
-  });
-
-  const handleChatSubmit = (e?: React.SyntheticEvent) => {
-    e?.preventDefault();
-    if (!chatInput.trim()) return;
-    sendMessage({ text: chatInput });
-    setChatInput("");
-  };
-
-  const isLoading = status === "submitted" || status === "streaming";
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -270,15 +241,21 @@ export default function JobCVPage({
 
   if (!localCvData || !job) return null;
 
+  const CVComponent = TEMPLATES[templateId].cv;
+  const CoverLetterComponent = TEMPLATES[templateId].coverLetter;
+
   return (
-    <Box sx={{ pb: 8 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+    <Box sx={{ pb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => router.push(`/profiles/${profileId}/jobs`)}
+          size="small"
           sx={{
             color: "text.secondary",
             boxShadow: "none",
+            py: 0.5,
+            px: 1,
             "&:hover": {
               boxShadow: "none",
               color: "text.primary",
@@ -302,106 +279,16 @@ export default function JobCVPage({
               top: 20,
             }}
           >
-            {/* AI Chat Card */}
-            <Card
-              sx={{
-                flexGrow: 1,
-                display: "flex",
-                flexDirection: "column",
-                bgcolor: "background.paper",
-                borderRadius: 2,
-                overflow: "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  p: 2,
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                }}
-              >
-                <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: 1,
-                    bgcolor: "rgba(16,185,129,0.1)",
-                    color: "#10b981",
-                    display: "flex",
-                  }}
-                >
-                  <SmartToyIcon />
-                </Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  AI Assistant
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  p: 2,
-                  overflowY: "auto",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                }}
-              >
-                {messages.map((msg) => (
-                  <Box
-                    key={msg.id}
-                    sx={{
-                      alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-                      maxWidth: "85%",
-                      bgcolor:
-                        msg.role === "user" ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.05)",
-                      p: 1.5,
-                      borderRadius: 2,
-                    }}
-                  >
-                    {msg.parts.map((part, i) =>
-                      part.type === "text" ? (
-                        <Typography key={i} variant="body2">
-                          {part.text}
-                        </Typography>
-                      ) : null,
-                    )}
-                  </Box>
-                ))}
-                {isLoading && (
-                  <Box sx={{ alignSelf: "flex-start", p: 1 }}>
-                    <CircularProgress size={20} sx={{ color: "#10b981" }} />
-                  </Box>
-                )}
-              </Box>
-
-              <Box sx={{ p: 2, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                <form onSubmit={handleChatSubmit}>
-                  <TextField
-                    fullWidth
-                    placeholder="Ask AI to tailor your CV..."
-                    variant="outlined"
-                    size="small"
-                    value={chatInput}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <IconButton
-                            type="submit"
-                            sx={{ color: "#10b981" }}
-                            disabled={isLoading || !chatInput.trim()}
-                          >
-                            <SendIcon fontSize="small" />
-                          </IconButton>
-                        ),
-                      },
-                    }}
-                  />
-                </form>
-              </Box>
-            </Card>
+            <AIChatAssistant
+              jobId={jobId}
+              profileId={profileId}
+              localCvData={localCvData}
+              jobDescription={job?.jobDescription}
+              onCvUpdate={setLocalCvData}
+              onCoverLetterUpdate={(content) =>
+                setLocalCvData((prev) => (prev ? { ...prev, coverLetter: content } : null))
+              }
+            />
           </Box>
         </Grid>
 
@@ -441,57 +328,69 @@ export default function JobCVPage({
                   label="Cover Letter"
                 />
                 <Tab
+                  icon={<StyleIcon sx={{ fontSize: "1.1rem" }} />}
+                  iconPosition="start"
+                  label="Templates"
+                />
+                <Tab
                   icon={<WorkIcon sx={{ fontSize: "1.1rem" }} />}
                   iconPosition="start"
                   label="Job Details"
                 />
               </Tabs>
               <Box sx={{ display: "flex", gap: 1 }}>
-                <PDFDownloadLink
-                  document={<CVPdfDocument data={localCvData} />}
-                  fileName={`CV_${localCvData.name.replace(/\s+/g, "_")}.pdf`}
-                  style={{ textDecoration: "none" }}
-                >
-                  {({ loading }: { loading: boolean }) => (
-                    <Button
-                      component="span"
-                      variant="contained"
-                      size="small"
-                      startIcon={<FileDownloadIcon />}
-                      sx={{ bgcolor: "#10b981" }}
-                      disabled={loading}
-                    >
-                      {loading ? "Preparing CV..." : "Download CV"}
-                    </Button>
-                  )}
-                </PDFDownloadLink>
-                <PDFDownloadLink
-                  document={
-                    <CoverLetterPdfDocument content={localCvData.coverLetter} data={localCvData} />
-                  }
-                  fileName={`Cover_Letter_${localCvData.name.replace(/\s+/g, "_")}.pdf`}
-                  style={{ textDecoration: "none" }}
-                >
-                  {({ loading }: { loading: boolean }) => (
-                    <Button
-                      component="span"
-                      variant="outlined"
-                      size="small"
-                      startIcon={<FileDownloadIcon />}
-                      sx={{ color: "#10b981", borderColor: "#10b981" }}
-                      disabled={loading}
-                    >
-                      {loading ? "Preparing Cover Letter..." : "Download Cover Letter"}
-                    </Button>
-                  )}
-                </PDFDownloadLink>
+                {tabValue === 0 && (
+                  <PDFDownloadLink
+                    document={<CVComponent data={localCvData} />}
+                    fileName="cv.pdf"
+                    style={{ textDecoration: "none" }}
+                  >
+                    {({ loading }: { loading: boolean }) => (
+                      <Button
+                        component="span"
+                        variant="contained"
+                        size="small"
+                        startIcon={<FileDownloadIcon />}
+                        sx={{ bgcolor: "#10b981" }}
+                        disabled={loading}
+                      >
+                        {loading ? "Preparing..." : "Download CV"}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
+                {tabValue === 1 && (
+                  <PDFDownloadLink
+                    document={
+                      <CoverLetterComponent
+                        content={localCvData.coverLetter}
+                        data={localCvData}
+                      />
+                    }
+                    fileName="cover-letter.pdf"
+                    style={{ textDecoration: "none" }}
+                  >
+                    {({ loading }: { loading: boolean }) => (
+                      <Button
+                        component="span"
+                        variant="contained"
+                        size="small"
+                        startIcon={<FileDownloadIcon />}
+                        sx={{ bgcolor: "#10b981" }}
+                        disabled={loading}
+                      >
+                        {loading ? "Preparing..." : "Download Letter"}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
               </Box>
             </Box>
 
             <Box
               sx={{
                 p: 4,
-                bgcolor: tabValue === 2 ? "transparent" : "#1e1e24",
+                bgcolor: tabValue === 2 || tabValue === 3 ? "transparent" : "#1e1e24",
                 display: "flex",
                 justifyContent: "center",
                 minHeight: "800px",
@@ -503,7 +402,7 @@ export default function JobCVPage({
                   height="800px"
                   style={{ border: "none", borderRadius: "8px" }}
                 >
-                  <CVPdfDocument data={localCvData} />
+                  <CVComponent data={localCvData} />
                 </PDFViewer>
               ) : tabValue === 1 ? (
                 <PDFViewer
@@ -511,8 +410,39 @@ export default function JobCVPage({
                   height="800px"
                   style={{ border: "none", borderRadius: "8px" }}
                 >
-                  <CoverLetterPdfDocument content={localCvData.coverLetter} data={localCvData} />
+                  <CoverLetterComponent content={localCvData.coverLetter} data={localCvData} />
                 </PDFViewer>
+              ) : tabValue === 2 ? (
+                <Box sx={{ width: "100%", maxWidth: "1000px", color: "text.primary" }}>
+                  <Typography variant="h5" sx={{ mb: 4, fontWeight: 600 }}>
+                    Select a Template
+                  </Typography>
+                  <Grid container spacing={3}>
+                    {Object.values(TEMPLATES).map((tmpl) => (
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={tmpl.id}>
+                        <Card
+                          onClick={() => setTemplateId(tmpl.id as TemplateId)}
+                          sx={{
+                            p: 4,
+                            cursor: "pointer",
+                            textAlign: "center",
+                            bgcolor: templateId === tmpl.id ? "rgba(16,185,129,0.1)" : "background.paper",
+                            border: "2px solid",
+                            borderColor: templateId === tmpl.id ? "#10b981" : "transparent",
+                            transition: "all 0.2s ease-in-out",
+                            "&:hover": {
+                              borderColor: templateId === tmpl.id ? "#10b981" : "rgba(255,255,255,0.1)",
+                              transform: "translateY(-4px)",
+                            },
+                          }}
+                        >
+                          <tmpl.icon sx={{ fontSize: 48, color: templateId === tmpl.id ? "#10b981" : "text.secondary", mb: 2 }} />
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>{tmpl.name}</Typography>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
               ) : (
                 <JobDetailsTab
                   job={job}

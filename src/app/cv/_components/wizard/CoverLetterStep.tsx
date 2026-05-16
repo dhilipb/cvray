@@ -13,17 +13,18 @@ export function CoverLetterStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
         Cover Letter
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
         Write your cover letter here. You can use HTML tags like &lt;strong&gt; for emphasis.
       </Typography>
       <TextField
         fullWidth
+        size="small"
         label="Cover Letter"
         multiline
-        rows={15}
+        rows={10}
         value={data.coverLetter}
         onChange={handleChange}
         variant="outlined"

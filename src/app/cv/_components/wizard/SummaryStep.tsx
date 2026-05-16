@@ -13,18 +13,19 @@ export function SummaryStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
         Professional Summary
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
         Provide a concise overview of your professional background and key strengths. You can use
         HTML tags like &lt;strong&gt; for emphasis.
       </Typography>
       <TextField
         fullWidth
+        size="small"
         label="Summary"
         multiline
-        rows={8}
+        rows={6}
         value={data.summary}
         onChange={handleChange}
         variant="outlined"

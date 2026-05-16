@@ -19,16 +19,17 @@ export function OtherInfoStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
         Other Details
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
         Any additional information (e.g., Right to Work, Languages).
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={1.5}>
         <Grid size={{ xs: 12, sm: 4 }}>
           <TextField
             fullWidth
+            size="small"
             label="Label (e.g., Right to Work)"
             value={data.other?.label || ""}
             onChange={(e) => handleOtherChange("label", e.target.value)}
@@ -38,6 +39,7 @@ export function OtherInfoStep({ data, updateData }: Props) {
         <Grid size={{ xs: 12, sm: 8 }}>
           <TextField
             fullWidth
+            size="small"
             label="Value (e.g., No sponsorship required)"
             value={data.other?.value || ""}
             onChange={(e) => handleOtherChange("value", e.target.value)}

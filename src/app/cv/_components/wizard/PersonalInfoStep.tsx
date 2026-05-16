@@ -14,13 +14,14 @@ export function PersonalInfoStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
         Personal Information
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="Full Name"
             name="name"
             value={data.name}
@@ -31,6 +32,7 @@ export function PersonalInfoStep({ data, updateData }: Props) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="Job Title"
             name="title"
             value={data.title}
@@ -41,6 +43,7 @@ export function PersonalInfoStep({ data, updateData }: Props) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="Email"
             name="email"
             type="email"
@@ -52,6 +55,7 @@ export function PersonalInfoStep({ data, updateData }: Props) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="Phone"
             name="phone"
             value={data.phone}
@@ -62,6 +66,7 @@ export function PersonalInfoStep({ data, updateData }: Props) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="Location"
             name="location"
             value={data.location}
@@ -72,6 +77,7 @@ export function PersonalInfoStep({ data, updateData }: Props) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="LinkedIn URL"
             name="linkedin"
             value={data.linkedin}

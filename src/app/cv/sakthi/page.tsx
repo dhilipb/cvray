@@ -132,12 +132,12 @@ export default function SakthiCVPage() {
               Cover Letter:
             </Typography>
             <Button
-              variant="outlined"
+              variant="contained"
               size="small"
               startIcon={<DownloadIcon />}
               onClick={() => handleDownload("coverletter")}
             >
-              Download
+              Download Letter
             </Button>
             <Tooltip title="Open in New Tab">
               <IconButton
@@ -167,7 +167,7 @@ export default function SakthiCVPage() {
               onClick={() => handleDownload("cv")}
               disableElevation
             >
-              Download
+              Download CV
             </Button>
             <Tooltip title="Open in New Tab">
               <IconButton

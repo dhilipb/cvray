@@ -67,29 +67,30 @@ export function ExperienceStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
         Work Experience
       </Typography>
 
       {data.experience.map((exp, index) => (
-        <Paper key={index} sx={{ p: 3, mb: 3, bgcolor: "background.default" }} variant="outlined">
+        <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: "background.default" }} variant="outlined">
           <Box
-            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}
+            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               Experience {index + 1}
             </Typography>
             {data.experience.length > 1 && (
-              <IconButton onClick={() => removeExperience(index)} color="error" size="small">
-                <DeleteIcon />
+              <IconButton onClick={() => removeExperience(index)} color="error" size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" />
               </IconButton>
             )}
           </Box>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={1.5}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
+                size="small"
                 label="Role / Position"
                 value={exp.role}
                 onChange={(e) => handleExperienceChange(index, "role", e.target.value)}
@@ -99,6 +100,7 @@ export function ExperienceStep({ data, updateData }: Props) {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
+                size="small"
                 label="Company"
                 value={exp.company}
                 onChange={(e) => handleExperienceChange(index, "company", e.target.value)}
@@ -108,6 +110,7 @@ export function ExperienceStep({ data, updateData }: Props) {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
+                size="small"
                 label="Client (Optional)"
                 value={exp.client}
                 onChange={(e) => handleExperienceChange(index, "client", e.target.value)}
@@ -117,6 +120,7 @@ export function ExperienceStep({ data, updateData }: Props) {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
+                size="small"
                 label="Dates (e.g., March 2025 - Present)"
                 value={exp.dates}
                 onChange={(e) => handleExperienceChange(index, "dates", e.target.value)}
@@ -126,6 +130,7 @@ export function ExperienceStep({ data, updateData }: Props) {
 
             <Grid size={12}>
               <FormControlLabel
+                sx={{ m: 0 }}
                 control={
                   <Switch
                     size="small"
@@ -134,17 +139,17 @@ export function ExperienceStep({ data, updateData }: Props) {
                     color="primary"
                   />
                 }
-                label={<Typography variant="caption">Force Page Break Before This Role</Typography>}
+                label={<Typography variant="caption" sx={{ fontSize: "0.7rem" }}>Force Page Break Before This Role</Typography>}
               />
             </Grid>
 
             <Grid size={12}>
-              <Typography variant="subtitle2" sx={{ mt: 1, mb: 1 }}>
-                Bullet Points (Achievements & Responsibilities)
+              <Typography variant="caption" sx={{ mt: 1, mb: 0.5, display: "block", fontWeight: 600, color: "text.secondary" }}>
+                Responsibilities & Achievements
               </Typography>
-              <Stack spacing={1}>
+              <Stack spacing={0.5}>
                 {exp.bulletPoints.map((bullet, bIndex) => (
-                  <Box key={bIndex} sx={{ display: "flex", gap: 1 }}>
+                  <Box key={bIndex} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                     <TextField
                       fullWidth
                       size="small"
@@ -152,11 +157,13 @@ export function ExperienceStep({ data, updateData }: Props) {
                       value={bullet}
                       onChange={(e) => handleBulletPointChange(index, bIndex, e.target.value)}
                       placeholder="Enter achievement..."
+                      sx={{ "& .MuiInputBase-root": { fontSize: "0.8rem" } }}
                     />
                     <IconButton
                       onClick={() => removeBulletPoint(index, bIndex)}
                       disabled={exp.bulletPoints.length === 1}
                       size="small"
+                      sx={{ p: 0.5 }}
                     >
                       <RemoveIcon fontSize="small" />
                     </IconButton>
@@ -166,7 +173,7 @@ export function ExperienceStep({ data, updateData }: Props) {
                   size="small"
                   startIcon={<AddIcon />}
                   onClick={() => addBulletPoint(index)}
-                  sx={{ alignSelf: "flex-start" }}
+                  sx={{ alignSelf: "flex-start", fontSize: "0.7rem", py: 0 }}
                 >
                   Add Bullet Point
                 </Button>
@@ -176,7 +183,7 @@ export function ExperienceStep({ data, updateData }: Props) {
         </Paper>
       ))}
 
-      <Button startIcon={<AddIcon />} onClick={addExperience} variant="outlined">
+      <Button startIcon={<AddIcon />} size="small" onClick={addExperience} variant="outlined">
         Add Work Experience
       </Button>
     </Box>

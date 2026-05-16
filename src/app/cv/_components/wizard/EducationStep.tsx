@@ -27,29 +27,30 @@ export function EducationStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
         Education
       </Typography>
 
       {data.education.map((edu, index) => (
-        <Paper key={index} sx={{ p: 3, mb: 3, bgcolor: "background.default" }} variant="outlined">
+        <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: "background.default" }} variant="outlined">
           <Box
-            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}
+            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               Education {index + 1}
             </Typography>
             {data.education.length > 1 && (
-              <IconButton onClick={() => removeEducation(index)} color="error" size="small">
-                <DeleteIcon />
+              <IconButton onClick={() => removeEducation(index)} color="error" size="small" sx={{ p: 0.5 }}>
+                <DeleteIcon fontSize="small" />
               </IconButton>
             )}
           </Box>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={1.5}>
             <Grid size={12}>
               <TextField
                 fullWidth
+                size="small"
                 label="Degree / Qualification"
                 value={edu.degree}
                 onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
@@ -59,6 +60,7 @@ export function EducationStep({ data, updateData }: Props) {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
+                size="small"
                 label="Institution"
                 value={edu.institution}
                 onChange={(e) => handleEducationChange(index, "institution", e.target.value)}
@@ -68,6 +70,7 @@ export function EducationStep({ data, updateData }: Props) {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
+                size="small"
                 label="Location"
                 value={edu.location}
                 onChange={(e) => handleEducationChange(index, "location", e.target.value)}
@@ -77,19 +80,21 @@ export function EducationStep({ data, updateData }: Props) {
             <Grid size={12}>
               <TextField
                 fullWidth
+                size="small"
                 label="Additional Details (Optional)"
                 multiline
                 rows={2}
                 value={edu.details}
                 onChange={(e) => handleEducationChange(index, "details", e.target.value)}
                 variant="outlined"
+                sx={{ "& .MuiInputBase-root": { fontSize: "0.85rem" } }}
               />
             </Grid>
           </Grid>
         </Paper>
       ))}
 
-      <Button startIcon={<AddIcon />} onClick={addEducation} variant="outlined">
+      <Button startIcon={<AddIcon />} size="small" onClick={addEducation} variant="outlined">
         Add Education
       </Button>
     </Box>

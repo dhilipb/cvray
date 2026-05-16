@@ -25,28 +25,29 @@ export function SkillsStep({ data, updateData }: Props) {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Skills
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+        Skills & Expertise
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
         Group your skills into categories (e.g., Technical, Management).
       </Typography>
 
       {data.skills.map((skill, index) => (
-        <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: "background.default" }} variant="outlined">
-          <Stack spacing={2}>
+        <Paper key={index} sx={{ p: 1.5, mb: 1.5, bgcolor: "background.default" }} variant="outlined">
+          <Stack spacing={1.5}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                 Category {index + 1}
               </Typography>
               {data.skills.length > 1 && (
-                <IconButton onClick={() => removeSkill(index)} color="error" size="small">
-                  <DeleteIcon />
+                <IconButton onClick={() => removeSkill(index)} color="error" size="small" sx={{ p: 0.5 }}>
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
               )}
             </Box>
             <TextField
               fullWidth
+              size="small"
               label="Category Name (e.g., Leadership)"
               value={skill.name}
               onChange={(e) => handleSkillChange(index, "name", e.target.value)}
@@ -54,6 +55,7 @@ export function SkillsStep({ data, updateData }: Props) {
             />
             <TextField
               fullWidth
+              size="small"
               label="Skills (comma separated)"
               multiline
               rows={2}
@@ -65,7 +67,7 @@ export function SkillsStep({ data, updateData }: Props) {
         </Paper>
       ))}
 
-      <Button startIcon={<AddIcon />} onClick={addSkill} variant="outlined" sx={{ mt: 1 }}>
+      <Button startIcon={<AddIcon />} size="small" onClick={addSkill} variant="outlined" sx={{ mt: 0.5 }}>
         Add Skill Category
       </Button>
     </Box>

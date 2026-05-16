@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use, useCallback } from "react";
+import React, { useState, useEffect, use, useCallback, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -16,10 +16,18 @@ import {
   TextField,
   CircularProgress,
   Alert,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import WorkIcon from "@mui/icons-material/Work";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import SortIcon from "@mui/icons-material/Sort";
 import { useRouter } from "next/navigation";
 
 interface Job {
@@ -50,6 +58,11 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   const [creating, setCreating] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
+  /* --------- Search, Filter, Sort State --------- */
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("newest");
+
   const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
@@ -72,6 +85,45 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
+
+  /* --------- Filtering & Sorting Logic --------- */
+  const filteredJobs = useMemo(() => {
+    let result = [...jobs];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (job) => job.role.toLowerCase().includes(query) || job.company.toLowerCase().includes(query),
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== "All") {
+      result = result.filter((job) => job.status === statusFilter);
+    }
+
+    // Sorting
+    result.sort((a, b) => {
+      if (sortBy === "newest") {
+        return new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime();
+      } else if (sortBy === "oldest") {
+        return new Date(a.appliedAt).getTime() - new Date(b.appliedAt).getTime();
+      } else if (sortBy === "company") {
+        return a.company.localeCompare(b.company);
+      } else if (sortBy === "role") {
+        return a.role.localeCompare(b.role);
+      }
+      return 0;
+    });
+
+    return result;
+  }, [jobs, searchQuery, statusFilter, sortBy]);
+
+  const statuses = useMemo(() => {
+    const s = Array.from(new Set(jobs.map((j) => j.status)));
+    return ["All", ...s];
+  }, [jobs]);
 
   const handleCreateJob = async () => {
     try {
@@ -152,6 +204,92 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
         CV against the job description using AI.
       </Typography>
 
+      {/* --------- Search, Filter, Sort Controls --------- */}
+      {jobs.length > 0 && (
+        <Box
+          sx={{
+            mb: 4,
+            p: 2,
+            bgcolor: "rgba(255,255,255,0.02)",
+            borderRadius: 2,
+            border: "1px solid rgba(255,255,255,0.05)",
+          }}
+        >
+          <Grid container spacing={2} alignItems="center">
+            <Grid size={{ xs: 12, md: 5 }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search by role or company..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ color: "text.secondary", fontSize: 20 }} />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "background.paper",
+                  },
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="status-filter-label">Status</InputLabel>
+                <Select
+                  labelId="status-filter-label"
+                  id="status-filter"
+                  value={statusFilter}
+                  label="Status"
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <FilterListIcon sx={{ color: "text.secondary", fontSize: 20, mr: 1 }} />
+                    </InputAdornment>
+                  }
+                  sx={{ bgcolor: "background.paper" }}
+                >
+                  {statuses.map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel id="sort-by-label">Sort By</InputLabel>
+                <Select
+                  labelId="sort-by-label"
+                  id="sort-by"
+                  value={sortBy}
+                  label="Sort By"
+                  onChange={(e) => setSortBy(e.target.value)}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <SortIcon sx={{ color: "text.secondary", fontSize: 20, mr: 1 }} />
+                    </InputAdornment>
+                  }
+                  sx={{ bgcolor: "background.paper" }}
+                >
+                  <MenuItem value="newest">Date Applied (Newest)</MenuItem>
+                  <MenuItem value="oldest">Date Applied (Oldest)</MenuItem>
+                  <MenuItem value="company">Company (A-Z)</MenuItem>
+                  <MenuItem value="role">Role (A-Z)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
+
       {error && (
         <Alert severity="error" sx={{ mb: 4 }}>
           {error}
@@ -183,9 +321,34 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
             Track your first job
           </Button>
         </Box>
+      ) : filteredJobs.length === 0 ? (
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 8,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            border: "1px dashed rgba(255,255,255,0.1)",
+          }}
+        >
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No applications match your current filters
+          </Typography>
+          <Button
+            variant="text"
+            color="primary"
+            onClick={() => {
+              setSearchQuery("");
+              setStatusFilter("All");
+              setSortBy("newest");
+            }}
+          >
+            Clear all filters
+          </Button>
+        </Box>
       ) : (
         <Grid container spacing={3}>
-          {jobs.map((job) => (
+          {filteredJobs.map((job) => (
             <Grid size={{ xs: 12 }} key={job.id}>
               <Card
                 onClick={() => router.push(`/profiles/${profileId}/jobs/${job.id}/cv`)}
