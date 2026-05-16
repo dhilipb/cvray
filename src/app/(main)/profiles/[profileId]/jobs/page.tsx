@@ -11,14 +11,13 @@ import WorkIcon from "@mui/icons-material/Work";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 
-import CVPreviewer from "@/components/cv/CVPreviewer";
-
 interface Job {
   id: string;
   company: string;
   role: string;
   status: string;
   appliedAt: string;
+  tweakedCvJson?: string;
 }
 
 export default function JobsPage({ params }: { params: Promise<{ profileId: string }> }) {
@@ -34,9 +33,6 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   const [newJobData, setNewJobData] = useState({ company: "", role: "", jobDescription: "", url: "" });
   const [creating, setCreating] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
-  
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
   useEffect(() => {
     fetchJobs();
@@ -85,11 +81,6 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
     } finally {
       setCreating(false);
     }
-  };
-
-  const handlePreview = (company: string) => {
-    setSelectedJob(company);
-    setPreviewOpen(true);
   };
 
   if (loading) {
@@ -148,15 +139,20 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
           {jobs.map((job) => (
             <Grid size={{ xs: 12 }} key={job.id}>
               <Card
+                onClick={() => router.push(`/profiles/${profileId}/jobs/${job.id}/cv`)}
                 sx={{
                   bgcolor: "background.paper",
                   border: "1px solid rgba(255,255,255,0.05)",
                   borderRadius: 2,
                   display: "flex",
                   alignItems: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
                   "&:hover": {
                     boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                    borderColor: "rgba(16,185,129,0.2)",
+                    borderColor: "rgba(16,185,129,0.4)",
+                    transform: "translateY(-2px)",
+                    bgcolor: "rgba(255,255,255,0.02)",
                   },
                 }}
               >
@@ -184,14 +180,6 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
                         fontWeight: 500
                       }} 
                     />
-                    <Button 
-                      variant="outlined" 
-                      size="small" 
-                      onClick={() => handlePreview(job.company)}
-                      sx={{ borderColor: "rgba(255,255,255,0.1)", color: "text.primary" }}
-                    >
-                      View CV
-                    </Button>
                   </Box>
                 </CardContent>
               </Card>
@@ -251,12 +239,6 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
           </Button>
         </DialogActions>
       </Dialog>
-
-      <CVPreviewer 
-        open={previewOpen} 
-        onClose={() => setPreviewOpen(false)} 
-        jobContext={selectedJob || undefined} 
-      />
     </Box>
   );
 }

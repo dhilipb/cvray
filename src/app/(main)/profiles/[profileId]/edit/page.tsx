@@ -10,9 +10,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useRouter } from "next/navigation";
 import { CVData, WorkExperience, SkillCategory } from "@/lib/types";
+import CVPreviewer from "@/components/cv/CVPreviewer";
 
 /* --------- Page Component --------- */
 
@@ -24,6 +26,7 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   
   const [profileName, setProfileName] = useState("");
   const [profileDescription, setProfileDescription] = useState("");
@@ -102,8 +105,9 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
     setCvData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleExperienceChange = (index: number, field: keyof WorkExperience, value: any) => {
+  const handleExperienceChange = (index: number, field: keyof WorkExperience, value: string | string[] | boolean | undefined) => {
     const newExperience = [...cvData.experience];
+    // @ts-ignore - dynamic key assignment
     newExperience[index] = { ...newExperience[index], [field]: value };
     setCvData(prev => ({ ...prev, experience: newExperience }));
   };
@@ -171,14 +175,24 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
 
   return (
     <Box sx={{ pb: 10 }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 4, alignItems: "center" }}>
-        <IconButton onClick={() => router.push("/profiles")} sx={{ color: "text.secondary" }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
-          Edit Profile
-        </Typography>
-      </Stack>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <IconButton onClick={() => router.push("/profiles")} sx={{ color: "text.secondary" }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
+            Edit Profile
+          </Typography>
+        </Stack>
+        <Button 
+          variant="outlined" 
+          startIcon={<VisibilityIcon />} 
+          onClick={() => setPreviewOpen(true)}
+          sx={{ borderColor: "rgba(255,255,255,0.2)", color: "text.primary" }}
+        >
+          Preview CV
+        </Button>
+      </Box>
 
       {error && <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mb: 4 }}>Profile saved successfully!</Alert>}
@@ -423,6 +437,12 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
           {saving ? <CircularProgress size={24} color="inherit" /> : <SaveIcon />}
         </Fab>
       </Tooltip>
+
+      <CVPreviewer 
+        open={previewOpen} 
+        onClose={() => setPreviewOpen(false)} 
+        cvData={cvData} 
+      />
     </Box>
   );
 }

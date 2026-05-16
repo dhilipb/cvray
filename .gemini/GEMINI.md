@@ -17,9 +17,10 @@
 ## Features
 - **Landing Page:** A visually stunning entry point with the CVRay logo and "Sign in with Google" functionality.
 - **Profiles First:** Users start by managing foundational base profiles (`/profiles`) displayed as clickable cards.
-- **Job Tracking:** Nested routing (`/profiles/[profileId]/jobs`) allows tracking applications tailored to a specific base profile.
-- **CV Uploading & Tailoring:** Users can upload base CVs and use Gemini to parse/tailor them for specific Job Descriptions.
-- **AI CV Previewer:** Reusable `CVPreviewer` component offering a side-by-side view of the generated CV alongside an AI Chat assistant.
+- **Job Tracking:** Nested routing (`/profiles/[profileId]/jobs`) allows tracking applications tailored to a specific base profile. Clicking a job card opens the dedicated CV Tailoring page.
+- **CV Tailoring Page:** A comprehensive workspace (`/profiles/[profileId]/jobs/[jobId]/cv`) featuring job details, an AI tailoring assistant, and live previews of the CV and cover letter.
+- **AI CV Assistant:** An interactive chatbot powered by Gemini Flash that can automatically modify CV data and cover letters using specialized tools (`updateCV`, `updateCoverLetter`).
+- **Dynamic Previews:** Side-by-side view of the CV and Cover Letter with instant updates as the AI modifies them.
 - **Dynamic PDF Generation:** Built-in CV viewing and PDF generation using `@react-pdf/renderer`.
 
 ## Tech Implementation Details

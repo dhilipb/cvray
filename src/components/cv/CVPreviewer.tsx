@@ -10,6 +10,7 @@ import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { CVData, WorkExperience } from "@/lib/types";
+import { renderWebText } from "@/lib/utils/renderWebText";
 
 interface CVPreviewerProps {
   open: boolean;
@@ -101,7 +102,7 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
                 
                 <Typography variant="h6" sx={{ fontWeight: 600, color: "#222", mb: 1 }}>Summary</Typography>
                 <Typography variant="body2" sx={{ mb: 4, color: "#333", lineHeight: 1.6 }}>
-                  {cvData.summary}
+                  {renderWebText(cvData.summary)}
                 </Typography>
 
                 <Typography variant="h6" sx={{ fontWeight: 600, color: "#222", mb: 1 }}>Experience</Typography>
@@ -109,9 +110,11 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
                   <Box key={idx} sx={{ mb: 3 }}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#222" }}>{exp.role} - {exp.company}</Typography>
                     <Typography variant="body2" sx={{ color: "#555", mb: 1 }}>{exp.dates}</Typography>
-                    <Typography component="ul" sx={{ m: 0, pl: 3, color: "#333", "& li": { mb: 0.5 } }}>
+                    <Typography component="div" sx={{ m: 0, pl: 3, color: "#333", "& .bullet-item": { mb: 0.5, display: 'list-item' } }}>
                       {exp.bulletPoints?.map((bp: string, bidx: number) => (
-                        <li key={bidx}>{bp}</li>
+                        <Box key={bidx} className="bullet-item">
+                          {renderWebText(bp)}
+                        </Box>
                       ))}
                     </Typography>
                   </Box>
