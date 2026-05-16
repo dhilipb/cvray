@@ -171,7 +171,7 @@ export const MinimalistCV = ({ data }: { data: CVData }) => (
   <Document title="cv">
     <Page size="A4" style={styles.page}>
       <DocumentHeader data={data} />
-      
+
       {data.summary && (
         <View style={{ marginBottom: 12 }}>
           <Text style={styles.summaryText}>{data.summary}</Text>
@@ -196,12 +196,13 @@ export const MinimalistCV = ({ data }: { data: CVData }) => (
                   </View>
                 )}
               </View>
-              {exp.bulletPoints && exp.bulletPoints.slice(1).map((bp, bidx) => (
-                <View key={bidx + 1} style={styles.bulletRow}>
-                  <Text style={styles.bulletPoint}>-</Text>
-                  <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
-                </View>
-              ))}
+              {exp.bulletPoints &&
+                exp.bulletPoints.slice(1).map((bp, bidx) => (
+                  <View key={bidx + 1} style={styles.bulletRow}>
+                    <Text style={styles.bulletPoint}>-</Text>
+                    <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
+                  </View>
+                ))}
             </View>
           ))}
         </View>

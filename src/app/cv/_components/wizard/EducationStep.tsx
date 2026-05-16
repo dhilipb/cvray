@@ -40,7 +40,12 @@ export function EducationStep({ data, updateData }: Props) {
               Education {index + 1}
             </Typography>
             {data.education.length > 1 && (
-              <IconButton onClick={() => removeEducation(index)} color="error" size="small" sx={{ p: 0.5 }}>
+              <IconButton
+                onClick={() => removeEducation(index)}
+                color="error"
+                size="small"
+                sx={{ p: 0.5 }}
+              >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             )}

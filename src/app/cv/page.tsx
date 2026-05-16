@@ -238,9 +238,9 @@ export default function CVWizardPage() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
+    <Container maxWidth="md" sx={{ py: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+        <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
           CV Wizard
         </Typography>
         <Button variant="outlined" size="small" onClick={loadSampleData}>
@@ -248,11 +248,15 @@ export default function CVWizardPage() {
         </Button>
       </Box>
 
-      <Paper sx={{ p: { xs: 2, md: 4 }, mt: 2 }} elevation={3}>
+      <Paper sx={{ p: { xs: 1.5, md: 3 }, mt: 1.5 }} elevation={3}>
         <Stepper
           activeStep={activeStep}
           alternativeLabel
-          sx={{ mb: 4, display: { xs: "none", md: "flex" } }}
+          sx={{
+            mb: 2.5,
+            display: { xs: "none", md: "flex" },
+            "& .MuiStepLabel-label": { fontSize: "0.75rem" },
+          }}
         >
           {STEPS.map((label) => (
             <Step key={label}>
@@ -261,18 +265,18 @@ export default function CVWizardPage() {
           ))}
         </Stepper>
 
-        <Box sx={{ display: { xs: "block", md: "none" }, mb: 4, textAlign: "center" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        <Box sx={{ display: { xs: "block", md: "none" }, mb: 2, textAlign: "center" }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
             Step {activeStep + 1} of {STEPS.length}: {STEPS[activeStep]}
           </Typography>
         </Box>
 
-        <Divider sx={{ mb: 4 }} />
+        <Divider sx={{ mb: 2.5 }} />
 
-        <Box sx={{ minHeight: "400px" }}>{renderStepContent(activeStep)}</Box>
+        <Box sx={{ minHeight: "300px" }}>{renderStepContent(activeStep)}</Box>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
-          <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined">
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+          <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined" size="small">
             Back
           </Button>
           <Box>
@@ -280,6 +284,7 @@ export default function CVWizardPage() {
               <Button
                 variant="contained"
                 color="success"
+                size="small"
                 onClick={() => {
                   const blob = new Blob([JSON.stringify(cvData, null, 2)], {
                     type: "application/json",
@@ -294,7 +299,7 @@ export default function CVWizardPage() {
                 Download JSON
               </Button>
             ) : (
-              <Button variant="contained" color="primary" onClick={handleNext}>
+              <Button variant="contained" color="primary" size="small" onClick={handleNext}>
                 Next
               </Button>
             )}

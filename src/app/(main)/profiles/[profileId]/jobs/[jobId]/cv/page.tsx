@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use, useMemo } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   Box,
   Typography,
@@ -11,14 +11,11 @@ import {
   Tabs,
   Tab,
   TextField,
-  IconButton,
   Card,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
 import WorkIcon from "@mui/icons-material/Work";
 import DescriptionIcon from "@mui/icons-material/Description";
-import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useRouter } from "next/navigation";
@@ -26,11 +23,16 @@ import { AIChatAssistant } from "./_components/AIChatAssistant";
 import { CVData } from "@/lib/types";
 import dynamic from "next/dynamic";
 import {
-  ClassicCV, ClassicCoverLetter,
-  ModernCV, ModernCoverLetter,
-  MinimalistCV, MinimalistCoverLetter,
-  ProfessionalCV, ProfessionalCoverLetter,
-  CreativeCV, CreativeCoverLetter,
+  ClassicCV,
+  ClassicCoverLetter,
+  ModernCV,
+  ModernCoverLetter,
+  MinimalistCV,
+  MinimalistCoverLetter,
+  ProfessionalCV,
+  ProfessionalCoverLetter,
+  CreativeCV,
+  CreativeCoverLetter,
 } from "@/components/cv/templates";
 import StyleIcon from "@mui/icons-material/Style";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
@@ -40,11 +42,41 @@ import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 
 const TEMPLATES = {
-  classic: { id: "classic", name: "Classic", cv: ClassicCV, coverLetter: ClassicCoverLetter, icon: HistoryEduIcon },
-  modern: { id: "modern", name: "Modern", cv: ModernCV, coverLetter: ModernCoverLetter, icon: AutoAwesomeIcon },
-  minimalist: { id: "minimalist", name: "Minimalist", cv: MinimalistCV, coverLetter: MinimalistCoverLetter, icon: CropFreeIcon },
-  professional: { id: "professional", name: "Professional", cv: ProfessionalCV, coverLetter: ProfessionalCoverLetter, icon: BusinessCenterIcon },
-  creative: { id: "creative", name: "Creative", cv: CreativeCV, coverLetter: CreativeCoverLetter, icon: ColorLensIcon },
+  classic: {
+    id: "classic",
+    name: "Classic",
+    cv: ClassicCV,
+    coverLetter: ClassicCoverLetter,
+    icon: HistoryEduIcon,
+  },
+  modern: {
+    id: "modern",
+    name: "Modern",
+    cv: ModernCV,
+    coverLetter: ModernCoverLetter,
+    icon: AutoAwesomeIcon,
+  },
+  minimalist: {
+    id: "minimalist",
+    name: "Minimalist",
+    cv: MinimalistCV,
+    coverLetter: MinimalistCoverLetter,
+    icon: CropFreeIcon,
+  },
+  professional: {
+    id: "professional",
+    name: "Professional",
+    cv: ProfessionalCV,
+    coverLetter: ProfessionalCoverLetter,
+    icon: BusinessCenterIcon,
+  },
+  creative: {
+    id: "creative",
+    name: "Creative",
+    cv: CreativeCV,
+    coverLetter: CreativeCoverLetter,
+    icon: ColorLensIcon,
+  },
 };
 
 type TemplateId = keyof typeof TEMPLATES;
@@ -362,10 +394,7 @@ export default function JobCVPage({
                 {tabValue === 1 && (
                   <PDFDownloadLink
                     document={
-                      <CoverLetterComponent
-                        content={localCvData.coverLetter}
-                        data={localCvData}
-                      />
+                      <CoverLetterComponent content={localCvData.coverLetter} data={localCvData} />
                     }
                     fileName="cover-letter.pdf"
                     style={{ textDecoration: "none" }}
@@ -426,18 +455,28 @@ export default function JobCVPage({
                             p: 4,
                             cursor: "pointer",
                             textAlign: "center",
-                            bgcolor: templateId === tmpl.id ? "rgba(16,185,129,0.1)" : "background.paper",
+                            bgcolor:
+                              templateId === tmpl.id ? "rgba(16,185,129,0.1)" : "background.paper",
                             border: "2px solid",
                             borderColor: templateId === tmpl.id ? "#10b981" : "transparent",
                             transition: "all 0.2s ease-in-out",
                             "&:hover": {
-                              borderColor: templateId === tmpl.id ? "#10b981" : "rgba(255,255,255,0.1)",
+                              borderColor:
+                                templateId === tmpl.id ? "#10b981" : "rgba(255,255,255,0.1)",
                               transform: "translateY(-4px)",
                             },
                           }}
                         >
-                          <tmpl.icon sx={{ fontSize: 48, color: templateId === tmpl.id ? "#10b981" : "text.secondary", mb: 2 }} />
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>{tmpl.name}</Typography>
+                          <tmpl.icon
+                            sx={{
+                              fontSize: 48,
+                              color: templateId === tmpl.id ? "#10b981" : "text.secondary",
+                              mb: 2,
+                            }}
+                          />
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {tmpl.name}
+                          </Typography>
                         </Card>
                       </Grid>
                     ))}

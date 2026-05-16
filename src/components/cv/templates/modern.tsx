@@ -198,7 +198,7 @@ export const ModernCV = ({ data }: { data: CVData }) => (
   <Document title="cv">
     <Page size="A4" style={styles.page}>
       <DocumentHeader data={data} />
-      
+
       {data.summary && (
         <View style={{ marginBottom: 16 }}>
           <Text style={styles.summaryText}>{data.summary}</Text>
@@ -209,9 +209,13 @@ export const ModernCV = ({ data }: { data: CVData }) => (
         <View>
           <Text style={styles.sectionTitle}>Skills</Text>
           <View style={styles.skillsContainer}>
-            {data.skills.flatMap(s => s.items.split(',').map(i => i.trim())).map((skill, idx) => (
-              <Text key={idx} style={styles.skillBadge}>{skill}</Text>
-            ))}
+            {data.skills
+              .flatMap((s) => s.items.split(",").map((i) => i.trim()))
+              .map((skill, idx) => (
+                <Text key={idx} style={styles.skillBadge}>
+                  {skill}
+                </Text>
+              ))}
           </View>
         </View>
       )}
@@ -234,12 +238,13 @@ export const ModernCV = ({ data }: { data: CVData }) => (
                   </View>
                 )}
               </View>
-              {exp.bulletPoints && exp.bulletPoints.slice(1).map((bp, bidx) => (
-                <View key={bidx + 1} style={styles.bulletRow}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
-                </View>
-              ))}
+              {exp.bulletPoints &&
+                exp.bulletPoints.slice(1).map((bp, bidx) => (
+                  <View key={bidx + 1} style={styles.bulletRow}>
+                    <Text style={styles.bulletPoint}>•</Text>
+                    <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
+                  </View>
+                ))}
             </View>
           ))}
         </View>

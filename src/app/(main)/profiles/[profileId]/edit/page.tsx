@@ -195,7 +195,10 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
     <Box sx={{ pb: 4 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <IconButton onClick={() => router.push("/profiles")} sx={{ color: "text.secondary", p: 0.5 }}>
+          <IconButton
+            onClick={() => router.push("/profiles")}
+            sx={{ color: "text.secondary", p: 0.5 }}
+          >
             <ArrowBackIcon fontSize="small" />
           </IconButton>
           <Typography variant="h5" sx={{ fontWeight: 800, color: "text.primary" }}>

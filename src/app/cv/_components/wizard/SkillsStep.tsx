@@ -33,14 +33,23 @@ export function SkillsStep({ data, updateData }: Props) {
       </Typography>
 
       {data.skills.map((skill, index) => (
-        <Paper key={index} sx={{ p: 1.5, mb: 1.5, bgcolor: "background.default" }} variant="outlined">
+        <Paper
+          key={index}
+          sx={{ p: 1.5, mb: 1.5, bgcolor: "background.default" }}
+          variant="outlined"
+        >
           <Stack spacing={1.5}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                 Category {index + 1}
               </Typography>
               {data.skills.length > 1 && (
-                <IconButton onClick={() => removeSkill(index)} color="error" size="small" sx={{ p: 0.5 }}>
+                <IconButton
+                  onClick={() => removeSkill(index)}
+                  color="error"
+                  size="small"
+                  sx={{ p: 0.5 }}
+                >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               )}
@@ -67,7 +76,13 @@ export function SkillsStep({ data, updateData }: Props) {
         </Paper>
       ))}
 
-      <Button startIcon={<AddIcon />} size="small" onClick={addSkill} variant="outlined" sx={{ mt: 0.5 }}>
+      <Button
+        startIcon={<AddIcon />}
+        size="small"
+        onClick={addSkill}
+        variant="outlined"
+        sx={{ mt: 0.5 }}
+      >
         Add Skill Category
       </Button>
     </Box>

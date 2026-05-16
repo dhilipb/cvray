@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  IconButton,
-  Card,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, TextField, IconButton, Card, CircularProgress } from "@mui/material";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendIcon from "@mui/icons-material/Send";
 import { useChat } from "@ai-sdk/react";
@@ -140,8 +133,7 @@ export const AIChatAssistant = ({
             sx={{
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               maxWidth: "85%",
-              bgcolor:
-                msg.role === "user" ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.05)",
+              bgcolor: msg.role === "user" ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.05)",
               p: 1.5,
               borderRadius: 2,
             }}

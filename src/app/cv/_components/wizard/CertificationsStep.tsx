@@ -32,7 +32,11 @@ export function CertificationsStep({ data, updateData }: Props) {
       </Typography>
 
       {data.certifications.map((cert, index) => (
-        <Paper key={index} sx={{ p: 1.5, mb: 1.5, bgcolor: "background.default" }} variant="outlined">
+        <Paper
+          key={index}
+          sx={{ p: 1.5, mb: 1.5, bgcolor: "background.default" }}
+          variant="outlined"
+        >
           <Box
             sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}
           >
@@ -40,7 +44,12 @@ export function CertificationsStep({ data, updateData }: Props) {
               Certification {index + 1}
             </Typography>
             {data.certifications.length > 1 && (
-              <IconButton onClick={() => removeCert(index)} color="error" size="small" sx={{ p: 0.5 }}>
+              <IconButton
+                onClick={() => removeCert(index)}
+                color="error"
+                size="small"
+                sx={{ p: 0.5 }}
+              >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             )}

@@ -94,7 +94,8 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (job) => job.role.toLowerCase().includes(query) || job.company.toLowerCase().includes(query),
+        (job) =>
+          job.role.toLowerCase().includes(query) || job.company.toLowerCase().includes(query),
       );
     }
 
@@ -215,7 +216,7 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
             border: "1px solid rgba(255,255,255,0.05)",
           }}
         >
-          <Grid container spacing={2} alignItems="center">
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
             <Grid size={{ xs: 12, md: 5 }}>
               <TextField
                 fullWidth

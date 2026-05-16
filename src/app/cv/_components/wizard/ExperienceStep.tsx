@@ -80,7 +80,12 @@ export function ExperienceStep({ data, updateData }: Props) {
               Experience {index + 1}
             </Typography>
             {data.experience.length > 1 && (
-              <IconButton onClick={() => removeExperience(index)} color="error" size="small" sx={{ p: 0.5 }}>
+              <IconButton
+                onClick={() => removeExperience(index)}
+                color="error"
+                size="small"
+                sx={{ p: 0.5 }}
+              >
                 <DeleteIcon fontSize="small" />
               </IconButton>
             )}
@@ -139,12 +144,19 @@ export function ExperienceStep({ data, updateData }: Props) {
                     color="primary"
                   />
                 }
-                label={<Typography variant="caption" sx={{ fontSize: "0.7rem" }}>Force Page Break Before This Role</Typography>}
+                label={
+                  <Typography variant="caption" sx={{ fontSize: "0.7rem" }}>
+                    Force Page Break Before This Role
+                  </Typography>
+                }
               />
             </Grid>
 
             <Grid size={12}>
-              <Typography variant="caption" sx={{ mt: 1, mb: 0.5, display: "block", fontWeight: 600, color: "text.secondary" }}>
+              <Typography
+                variant="caption"
+                sx={{ mt: 1, mb: 0.5, display: "block", fontWeight: 600, color: "text.secondary" }}
+              >
                 Responsibilities & Achievements
               </Typography>
               <Stack spacing={0.5}>

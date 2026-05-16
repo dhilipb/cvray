@@ -182,9 +182,13 @@ const Sidebar = ({ data }: { data: CVData }) => (
       <View>
         <Text style={styles.sidebarTitle}>Skills</Text>
         <View style={styles.skillsWrapper}>
-          {data.skills.flatMap(s => s.items.split(',').map(i => i.trim())).map((skill, idx) => (
-            <Text key={idx} style={styles.skillBadge}>{skill}</Text>
-          ))}
+          {data.skills
+            .flatMap((s) => s.items.split(",").map((i) => i.trim()))
+            .map((skill, idx) => (
+              <Text key={idx} style={styles.skillBadge}>
+                {skill}
+              </Text>
+            ))}
         </View>
       </View>
     )}
@@ -208,7 +212,7 @@ export const CreativeCV = ({ data }: { data: CVData }) => (
     <Page size="A4" style={styles.page}>
       <View style={styles.sidebarBg} fixed />
       <Sidebar data={data} />
-      
+
       <View style={styles.rightColumn}>
         {data.summary && (
           <View>
@@ -233,12 +237,13 @@ export const CreativeCV = ({ data }: { data: CVData }) => (
                     </View>
                   )}
                 </View>
-                {exp.bulletPoints && exp.bulletPoints.slice(1).map((bp, bidx) => (
-                  <View key={bidx + 1} style={styles.bulletRow}>
-                    <Text style={styles.bulletPoint}>›</Text>
-                    <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
-                  </View>
-                ))}
+                {exp.bulletPoints &&
+                  exp.bulletPoints.slice(1).map((bp, bidx) => (
+                    <View key={bidx + 1} style={styles.bulletRow}>
+                      <Text style={styles.bulletPoint}>›</Text>
+                      <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
+                    </View>
+                  ))}
               </View>
             ))}
           </View>
