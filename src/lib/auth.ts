@@ -5,6 +5,17 @@ import { prisma } from "@/lib/prisma";
 
 /* --------- Auth Configuration --------- */
 
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    }
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -19,11 +30,11 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       if (token && session.user) {
-        (session.user as any).id = token.sub;
+        session.user.id = token.sub as string;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token }) {
       return token;
     },
   },

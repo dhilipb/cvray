@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function ExperienceStep({ data, updateData }: Props) {
-	const handleExperienceChange = (index: number, field: keyof WorkExperience, value: any) => {
+	const handleExperienceChange = <K extends keyof WorkExperience>(index: number, field: K, value: WorkExperience[K]) => {
 		const newExperience = [...data.experience];
 		newExperience[index] = { ...newExperience[index], [field]: value };
 		updateData({ experience: newExperience });

@@ -12,7 +12,9 @@ import fonts from 'google-fonts-complete';
 export async function getGoogleFontUrl(family: string, weight: number = 400, italic: boolean = false): Promise<string> {
 	try {
 		// The library exports a single object where keys are font family names
-		const allFonts = fonts as Record<string, any>;
+		const allFonts = fonts as Record<string, {
+			variants?: Record<string, Record<string, { url?: { ttf?: string } }>>
+		}>;
 		const font = allFonts[family];
 
 		if (!font) {
@@ -32,7 +34,7 @@ export async function getGoogleFontUrl(family: string, weight: number = 400, ita
 		}
 
 		return variant.url.ttf;
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error(`Error loading font ${family}:`, error);
 
 		// Final static fallback for robustness

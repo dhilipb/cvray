@@ -8,11 +8,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prof
     const { profileId } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !(session.user as any).id) {
+    if (!session?.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = session.user.id;
 
     const profile = await prisma.userProfile.findFirst({
       where: {
@@ -26,9 +26,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prof
     }
 
     return NextResponse.json({ success: true, profile });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch Profile Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -37,11 +38,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
     const { profileId } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !(session.user as any).id) {
+    if (!session?.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = session.user.id;
 
     const { name, description, parsedProfileJson } = await req.json();
 
@@ -58,8 +59,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
     });
 
     return NextResponse.json({ success: true, profile });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update Profile Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

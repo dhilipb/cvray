@@ -19,7 +19,7 @@ export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") {
   // Clear the cache to pick up the new schema if it changed
-  // @ts-ignore
+  // @ts-expect-error - prisma is not defined on globalThis in standard types
   delete globalThis.prisma;
   globalForPrisma.prisma = prisma;
 }

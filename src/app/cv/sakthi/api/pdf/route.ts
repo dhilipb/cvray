@@ -22,18 +22,18 @@ export async function GET(req: NextRequest) {
 			element = React.createElement(CVResume, { data: cvData, isHeadhunterMode });
 		}
 
-		const buffer = await renderToBuffer(element as any);
+		const buffer = await renderToBuffer(element as React.ReactElement);
 
 		const fileNameSuffix = isHeadhunterMode ? 'Candidate' : 'Sakthi_Buddha';
 		const fileName = type === 'coverletter' ? `Cover_Letter_${fileNameSuffix}.pdf` : `CV_${fileNameSuffix}.pdf`;
 
-		return new NextResponse(buffer as any, {
+		return new NextResponse(buffer as BodyInit, {
 			headers: {
 				'Content-Type': 'application/pdf',
 				'Content-Disposition': `attachment; filename="${fileName}"`,
 			},
 		});
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('PDF Generation Error:', error);
 		return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 });
 	}

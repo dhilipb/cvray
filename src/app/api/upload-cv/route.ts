@@ -2,9 +2,10 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cvSchema } from "@/lib/schemas/cv";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateObject } from "ai";
+import { generateText, Output } from "ai";
 import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,11 +17,11 @@ export async function POST(req: NextRequest) {
     // Get session to associate profile with user
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !(session.user as any).id) {
+    if (!session?.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = session.user.id;
 
     if (!file) {
       // Create empty profile if no file
@@ -59,10 +60,12 @@ export async function POST(req: NextRequest) {
       apiKey: process.env.GEMINI_API_KEY || "",
     });
 
-    // Use generateObject for structured extraction
-    const { object: parsedJson } = await generateObject({
+    // Use generateText with output for structured extraction
+    const { output: parsedJson } = await generateText({
       model: google("gemini-1.5-flash"),
-      schema: cvSchema,
+      output: Output.object({
+        schema: cvSchema
+      }),
       messages: [
         {
           role: "user",
@@ -87,23 +90,26 @@ export async function POST(req: NextRequest) {
       ],
     });
 
+    const typedParsedJson = parsedJson as z.infer<typeof cvSchema>;
+
     // Save to database
     const userProfile = await prisma.userProfile.create({
       data: {
-        name: name || parsedJson.name || "Unknown",
+        name: name || typedParsedJson.name || "Unknown",
         description: description,
-        email: parsedJson.email,
-        originalCvText: parsedJson.fullText || "",
-        parsedProfileJson: JSON.stringify(parsedJson),
+        email: typedParsedJson.email,
+        originalCvText: typedParsedJson.fullText || "",
+        parsedProfileJson: JSON.stringify(typedParsedJson),
         userId: userId,
       },
     });
 
     return NextResponse.json({ success: true, profile: userProfile });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("CV Upload Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { error: error.message || "Internal server error" },
+      { error: errorMessage },
       { status: 500 },
     );
   }

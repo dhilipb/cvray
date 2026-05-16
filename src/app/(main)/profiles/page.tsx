@@ -166,7 +166,7 @@ export default function ProfilesPage() {
             try {
               const parsed = JSON.parse(profile.parsedProfileJson);
               role = parsed.title || "User Profile";
-            } catch (e) {}
+            } catch {}
 
             return (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={profile.id}>

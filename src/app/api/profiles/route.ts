@@ -7,11 +7,11 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !(session.user as any).id) {
+    if (!session?.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = session.user.id;
 
     const profiles = await prisma.userProfile.findMany({
       where: {
@@ -23,8 +23,8 @@ export async function GET() {
     });
 
     return NextResponse.json({ success: true, profiles });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch Profiles Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }

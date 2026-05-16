@@ -194,7 +194,7 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
             size="small"
             value={chatMessage}
             onChange={(e) => setChatMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             slotProps={{
               input: {
                 sx: { borderRadius: 3, pr: 0.5 },

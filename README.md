@@ -10,7 +10,7 @@ A Next.js application for rendering and managing CVs and Cover Letters, with sup
 - **UI Components:** Material UI (MUI)
 - **PDF Rendering:** @react-pdf/renderer
 - **AI:** Google Gemini
-- **Language:** TypeScript
+- **Language:** TypeScript (Strict ESLint with deprecation checks)
 
 ## Getting Started
 

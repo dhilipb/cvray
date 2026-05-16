@@ -3,7 +3,7 @@
 import React, { useState, useEffect, use } from "react";
 import { 
   Box, Typography, Button, TextField, Grid, Card, CardContent, 
-  IconButton, Divider, Stack, CircularProgress, Alert, Paper,
+  IconButton, Stack, CircularProgress, Alert,
   Fab, Tooltip
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -11,7 +11,6 @@ import SaveIcon from "@mui/icons-material/Save";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import { useRouter } from "next/navigation";
 import { CVData, WorkExperience, SkillCategory } from "@/lib/types";
 import CVPreviewer from "@/components/cv/CVPreviewer";
@@ -43,30 +42,30 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
   });
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/profiles/${profileId}`);
+        const data = await res.json();
+        if (data.success) {
+          setProfileName(data.profile.name);
+          setProfileDescription(data.profile.description || "");
+          if (data.profile.parsedProfileJson) {
+            setCvData(JSON.parse(data.profile.parsedProfileJson));
+          }
+        } else {
+          setError(data.error || "Failed to fetch profile");
+        }
+      } catch (err) {
+        setError("An error occurred");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProfile();
   }, [profileId]);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/profiles/${profileId}`);
-      const data = await res.json();
-      if (data.success) {
-        setProfileName(data.profile.name);
-        setProfileDescription(data.profile.description || "");
-        if (data.profile.parsedProfileJson) {
-          setCvData(JSON.parse(data.profile.parsedProfileJson));
-        }
-      } else {
-        setError(data.error || "Failed to fetch profile");
-      }
-    } catch (err) {
-      setError("An error occurred");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     try {
@@ -107,7 +106,7 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
 
   const handleExperienceChange = (index: number, field: keyof WorkExperience, value: string | string[] | boolean | undefined) => {
     const newExperience = [...cvData.experience];
-    // @ts-ignore - dynamic key assignment
+    // @ts-expect-error - dynamic key assignment
     newExperience[index] = { ...newExperience[index], [field]: value };
     setCvData(prev => ({ ...prev, experience: newExperience }));
   };

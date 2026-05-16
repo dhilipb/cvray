@@ -8,11 +8,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prof
     const { profileId, jobId } = await params;
     const session = await getServerSession(authOptions);
 
-    if (!session?.user || !(session.user as any).id) {
+    if (!session?.user || !session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userId = (session.user as any).id;
+    const userId = session.user.id;
 
     // Verify ownership of the profile and job
     const job = await prisma.jobApplication.findFirst({
@@ -33,8 +33,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prof
     }
 
     return NextResponse.json({ success: true, job });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Fetch Job Error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
   }
 }

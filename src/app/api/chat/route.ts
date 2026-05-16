@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { streamText, tool } from "ai";
+import { streamText, tool, createUIMessageStreamResponse } from "ai";
 import { z } from "zod";
 import { cvSchema } from "@/lib/schemas/cv";
 import { prisma } from "@/lib/prisma";
@@ -9,11 +9,11 @@ import { authOptions } from "@/lib/auth";
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user || !(session.user as any).id) {
+    if (!session?.user || !session.user.id) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { messages, jobId, profileId, cvData, jobDescription } = await req.json();
+    const { messages, jobId, profileId: _profileId, cvData, jobDescription } = await req.json();
 
     const google = createGoogleGenerativeAI({
       apiKey: process.env.GEMINI_API_KEY || "",
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       tools: {
         updateCV: tool({
           description: "Update the CV data with new information or modifications.",
-          parameters: cvSchema,
+          inputSchema: cvSchema,
           execute: async (newCvData) => {
             // Persist the change
             await prisma.jobApplication.update({
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         }),
         updateCoverLetter: tool({
           description: "Update the cover letter text.",
-          parameters: z.object({
+          inputSchema: z.object({
             content: z.string().describe("The full text of the updated cover letter"),
           }),
           execute: async ({ content }) => {
@@ -77,9 +77,12 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toDataStreamResponse();
-  } catch (error: any) {
+    return createUIMessageStreamResponse({
+      stream: result.toUIMessageStream()
+    });
+  } catch (error: unknown) {
     console.error("Chat API Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }
 }

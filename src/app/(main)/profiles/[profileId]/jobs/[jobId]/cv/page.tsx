@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, useMemo } from "react";
 import { 
   Box, Typography, Grid, Paper, Button, Divider, 
   CircularProgress, Alert, Tabs, Tab, TextField, IconButton,
@@ -13,10 +13,9 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import SendIcon from "@mui/icons-material/Send";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import SchoolIcon from "@mui/icons-material/School";
-import BadgeIcon from "@mui/icons-material/Badge";
 import { useRouter } from "next/navigation";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { CVData } from "@/lib/types";
 
 /* --------- Components --------- */
@@ -151,41 +150,67 @@ const CoverLetterDisplay = ({ content, name }: { content?: string, name: string 
 
 /* --------- Main Page --------- */
 
+interface JobWithProfile {
+  role: string;
+  company: string;
+  jobDescription?: string;
+  tweakedCvJson?: string;
+  userProfile: {
+    parsedProfileJson: string;
+  };
+}
+
 export default function JobCVPage({ params }: { params: Promise<{ profileId: string, jobId: string }> }) {
   const router = useRouter();
   const { profileId, jobId } = use(params);
 
-  const [job, setJob] = useState<any>(null);
+  const [job, setJob] = useState<JobWithProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   
+  const [chatInput, setChatInput] = useState("");
   const [localCvData, setLocalCvData] = useState<CVData | null>(null);
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const transport = useMemo(() => new DefaultChatTransport({
     api: "/api/chat",
-    body: {
+    body: () => ({
       jobId,
       profileId,
       cvData: localCvData,
       jobDescription: job?.jobDescription
-    },
+    })
+  }), [jobId, profileId, localCvData, job?.jobDescription]);
+
+  const { messages, sendMessage, status } = useChat({
+    transport,
     onToolCall: async ({ toolCall }) => {
       if (toolCall.toolName === 'updateCV') {
-        const newCvData = toolCall.args as CVData;
+        const newCvData = toolCall.input as CVData;
         setLocalCvData(newCvData);
-        return "CV updated successfully!";
       }
       if (toolCall.toolName === 'updateCoverLetter') {
-        const { content } = toolCall.args as { content: string };
+        const { content } = toolCall.input as { content: string };
         setLocalCvData(prev => prev ? ({ ...prev, coverLetter: content }) : null);
-        return "Cover letter updated successfully!";
       }
     },
-    initialMessages: [
-      { id: "1", role: "assistant", content: "Hi! I'm your AI CV assistant. I can help you tailor your CV and cover letter for this specific role. What would you like to change?" }
+    messages: [
+      { 
+        id: "1", 
+        role: "assistant", 
+        parts: [{ type: "text", text: "Hi! I'm your AI CV assistant. I can help you tailor your CV and cover letter for this specific role. What would you like to change?" }] 
+      }
     ]
   });
+
+  const handleChatSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!chatInput.trim()) return;
+    sendMessage({ text: chatInput });
+    setChatInput("");
+  };
+
+  const isLoading = status === "submitted" || status === "streaming";
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -198,7 +223,7 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
         } else {
           setError(data.error || "Failed to fetch job details");
         }
-      } catch (err) {
+      } catch {
         setError("An error occurred");
       } finally {
         setLoading(false);
@@ -210,7 +235,7 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
   if (loading) return <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}><CircularProgress /></Box>;
   if (error) return <Box sx={{ p: 4 }}><Alert severity="error">{error}</Alert></Box>;
 
-  if (!localCvData) return null;
+  if (!localCvData || !job) return null;
 
   return (
     <Box sx={{ pb: 8 }}>
@@ -275,7 +300,11 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
                       borderRadius: 2,
                     }}
                   >
-                    <Typography variant="body2">{msg.content}</Typography>
+                    {msg.parts.map((part, i) => (
+                      part.type === "text" ? (
+                        <Typography key={i} variant="body2">{part.text}</Typography>
+                      ) : null
+                    ))}
                   </Box>
                 ))}
                 {isLoading && (
@@ -286,18 +315,18 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
               </Box>
 
               <Box sx={{ p: 2, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleChatSubmit}>
                   <TextField
                     fullWidth
                     placeholder="Ask AI to tailor your CV..."
                     variant="outlined"
                     size="small"
-                    value={input}
-                    onChange={handleInputChange}
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
                     slotProps={{
                       input: {
                         endAdornment: (
-                          <IconButton type="submit" sx={{ color: "#10b981" }} disabled={isLoading || !input.trim()}>
+                          <IconButton type="submit" sx={{ color: "#10b981" }} disabled={isLoading || !chatInput.trim()}>
                             <SendIcon fontSize="small" />
                           </IconButton>
                         )

@@ -35,27 +35,27 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   const [dialogError, setDialogError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/profiles/${profileId}/jobs`);
+        const data = await res.json();
+        if (data.success) {
+          setJobs(data.jobs);
+          setProfileName(data.profileName);
+        } else {
+          setError(data.error || "Failed to fetch jobs");
+        }
+      } catch (err) {
+        setError("An error occurred while fetching jobs");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchJobs();
   }, [profileId]);
-
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/profiles/${profileId}/jobs`);
-      const data = await res.json();
-      if (data.success) {
-        setJobs(data.jobs);
-        setProfileName(data.profileName);
-      } else {
-        setError(data.error || "Failed to fetch jobs");
-      }
-    } catch (err) {
-      setError("An error occurred while fetching jobs");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCreateJob = async () => {
     try {
