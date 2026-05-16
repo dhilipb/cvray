@@ -8,8 +8,12 @@ import {
   Typography,
 } from "@mui/material";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { usePathname } from "next/navigation";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isFullWidth = pathname?.includes("/cv");
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default", flexDirection: "column" }}>
       <AppBar
@@ -48,7 +52,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           flexGrow: 1,
           p: 3,
           pt: 12, // Offset for the fixed AppBar
-          maxWidth: "1200px",
+          maxWidth: isFullWidth ? "100%" : "1200px",
           width: "100%",
           mx: "auto"
         }}

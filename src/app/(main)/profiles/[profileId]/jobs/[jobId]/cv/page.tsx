@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, use, useMemo } from "react";
 import { 
-  Box, Typography, Grid, Paper, Button, Divider, 
+  Box, Typography, Grid, Button,
   CircularProgress, Alert, Tabs, Tab, TextField, IconButton,
-  Card, CardContent
+  Card
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
@@ -18,268 +18,99 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { CVData } from "@/lib/types";
+import dynamic from "next/dynamic";
+import { CVPdfDocument, CoverLetterPdfDocument } from "@/components/cv/CVPdfDocument";
 
-/* --------- Components --------- */
-
-const DocumentHeader = ({ data }: { data: CVData }) => (
-  <Box sx={{ mb: 4 }}>
-    <Typography variant="h3" sx={{ fontFamily: "'Georgia', 'Times New Roman', serif", fontWeight: 700, color: "#1a1a2e", mb: 0.5, letterSpacing: "-0.5px" }}>
-      {data.name}
-    </Typography>
-    <Typography variant="h6" sx={{ color: "#2f5597", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", mb: 1, fontSize: "1.1rem" }}>
-      {data.title}
-    </Typography>
-    
-    <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", fontSize: "0.85rem", color: "#666", mb: 1.5 }}>
-      {data.email && <Box component="span" sx={{ mr: 1.5 }}>{data.email}</Box>}
-      {data.email && data.phone && <Box component="span" sx={{ mr: 1.5, color: "#ccc" }}>•</Box>}
-      {data.phone && <Box component="span" sx={{ mr: 1.5 }}>{data.phone}</Box>}
-      {data.phone && data.location && <Box component="span" sx={{ mr: 1.5, color: "#ccc" }}>•</Box>}
-      {data.location && <Box component="span" sx={{ mr: 1.5 }}>{data.location}</Box>}
-      {data.location && data.linkedin && <Box component="span" sx={{ mr: 1.5, color: "#ccc" }}>•</Box>}
-      {data.linkedin && <Box component="span" sx={{ textDecoration: "underline" }}>{data.linkedin}</Box>}
-    </Box>
-
-    <Divider sx={{ borderWidth: 1.5, borderColor: "#2f5597" }} />
-  </Box>
+const PDFViewer = dynamic(
+  () => import("@react-pdf/renderer").then(mod => mod.PDFViewer),
+  { ssr: false, loading: () => <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "800px", width: "100%", bgcolor: "#1e1e24" }}><CircularProgress sx={{ color: "#10b981" }} /></Box> }
 );
 
-const CVDisplay = ({ data }: { data: CVData }) => {
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then(mod => mod.PDFDownloadLink),
+  { ssr: false, loading: () => <Button variant="outlined" size="small" disabled>Loading...</Button> }
+);
+
+
+
+const JobDetailsTab = ({ job, profileId, jobId, onUpdate }: { job: JobWithProfile, profileId: string, jobId: string, onUpdate: (job: JobWithProfile) => void }) => {
+  const [role, setRole] = useState(job.role);
+  const [company, setCompany] = useState(job.company);
+  const [description, setDescription] = useState(job.jobDescription || "");
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveSuccess(false);
+    try {
+      const res = await fetch(`/api/profiles/${profileId}/jobs/${jobId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role, company, jobDescription: description })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaveSuccess(true);
+        onUpdate(data.job);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <Paper 
-      elevation={3}
-      sx={{ 
-        width: "100%", 
-        maxWidth: "210mm",
-        minHeight: "297mm", 
-        bgcolor: "#ffffff", 
-        color: "#000000",
-        p: { xs: 4, md: "20mm" },
-        borderRadius: 0,
-        fontFamily: "'Inter', sans-serif",
-        position: "relative",
-        // Page break indicators
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          pointerEvents: "none",
-          backgroundImage: `linear-gradient(to bottom, transparent 296.5mm, #e5e7eb 296.5mm, #e5e7eb 297mm, transparent 297mm)`,
-          backgroundSize: "100% 297mm",
-          zIndex: 10
-        }
-      }}
-    >
-      {/* Page Break Label Overlay */}
-      <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 11 }}>
-        {[1, 2, 3, 4].map((page) => (
-          <Box 
-            key={page} 
-            sx={{ 
-              position: "absolute", 
-              top: `${page * 297}mm`, 
-              right: "10mm", 
-              transform: "translateY(-100%)",
-              display: "flex",
-              alignItems: "center",
-              gap: 1
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 500, bgcolor: "white", px: 1 }}>
-              PAGE {page} END
-            </Typography>
-          </Box>
-        ))}
+    <Box sx={{ p: 4, width: "100%", maxWidth: "1000px", color: "text.primary" }}>
+      <Typography variant="h5" sx={{ mb: 4, fontWeight: 600 }}>Edit Job Details</Typography>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TextField 
+            fullWidth 
+            label="Role" 
+            value={role} 
+            onChange={(e) => setRole(e.target.value)} 
+            variant="outlined" 
+            sx={{ mb: 2 }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TextField 
+            fullWidth 
+            label="Company" 
+            value={company} 
+            onChange={(e) => setCompany(e.target.value)} 
+            variant="outlined" 
+            sx={{ mb: 2 }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          <TextField 
+            fullWidth 
+            label="Job Description" 
+            multiline 
+            rows={15} 
+            value={description} 
+            onChange={(e) => setDescription(e.target.value)} 
+            variant="outlined" 
+            sx={{ mb: 3 }}
+          />
+        </Grid>
+      </Grid>
+      <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        <Button 
+          variant="contained" 
+          onClick={handleSave} 
+          disabled={saving}
+          sx={{ bgcolor: "#10b981", "&:hover": { bgcolor: "#059669" } }}
+        >
+          {saving ? "Saving..." : "Save Details"}
+        </Button>
+        {saveSuccess && <Alert severity="success" sx={{ py: 0 }}>Saved successfully!</Alert>}
       </Box>
-
-      <Box sx={{ position: "relative", zIndex: 1 }}>
-        <DocumentHeader data={data} />
-
-        {data.summary && (
-          <Box sx={{ borderLeft: "3px solid #2f5597", pl: 2, mb: 4 }}>
-            <Typography variant="body2" sx={{ color: "#333", lineHeight: 1.6, fontSize: "0.9rem" }}>
-              {data.summary}
-            </Typography>
-          </Box>
-        )}
-
-        {data.skills && data.skills.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 1.5, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
-              CORE COMPETENCIES
-            </Typography>
-            <Box sx={{ borderTop: "1px solid #eee", borderBottom: "1px solid #eee" }}>
-              {data.skills.map((skill, idx) => (
-                <Box key={idx} sx={{ display: "flex", py: 1.5, borderBottom: idx === data.skills!.length - 1 ? "none" : "1px solid #eee" }}>
-                  <Box sx={{ width: "25%", pr: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: "#2f5597", fontSize: "0.85rem" }}>{skill.name}</Typography>
-                  </Box>
-                  <Box sx={{ width: "75%" }}>
-                    <Typography variant="body2" sx={{ color: "#444", fontSize: "0.85rem", lineHeight: 1.5 }}>{skill.items}</Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-        )}
-
-        {data.experience && data.experience.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
-              PROFESSIONAL EXPERIENCE
-            </Typography>
-            {data.experience.map((exp, idx) => (
-              <Box key={idx} sx={{ mb: 3.5, position: "relative" }}>
-                {exp.break && (
-                  <Box sx={{ 
-                    my: 4, 
-                    borderTop: "2px dashed #2f5597", 
-                    position: "relative",
-                    "&::after": {
-                      content: '"Manual Page Break"',
-                      position: "absolute",
-                      top: -10,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      bgcolor: "white",
-                      px: 2,
-                      color: "#2f5597",
-                      fontSize: "10px",
-                      fontWeight: 700,
-                      textTransform: "uppercase"
-                    }
-                  }} />
-                )}
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#222", fontSize: "1rem" }}>{exp.role}</Typography>
-                  <Typography variant="body2" sx={{ color: "#888", fontSize: "0.85rem", whiteSpace: "nowrap", ml: 2 }}>{exp.dates}</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ mb: 1.5, fontSize: "0.9rem" }}>
-                  <Box component="span" sx={{ color: "#666", fontWeight: 600 }}>{exp.company}</Box>
-                </Typography>
-                <Box component="ul" sx={{ m: 0, pl: 0, listStyle: "none", color: "#333", "& li": { mb: 0.8, display: "flex", alignItems: "flex-start", fontSize: "0.88rem", lineHeight: 1.5 } }}>
-                  {exp.bulletPoints?.map((bp, bidx) => (
-                    <Box component="li" key={bidx}>
-                      <Box component="span" sx={{ color: "#2f5597", mr: 1, fontWeight: "bold", fontSize: "1.1rem", lineHeight: 1 }}>›</Box>
-                      <Box component="span" dangerouslySetInnerHTML={{ __html: bp.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            ))}
-          </Box>
-        )}
-
-        {data.education && data.education.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
-              EDUCATION
-            </Typography>
-            {data.education.map((edu, idx) => (
-              <Box key={idx} sx={{ mb: 2 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#222", fontSize: "0.95rem" }}>{edu.degree}</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ color: "#555", fontWeight: 600, fontSize: "0.85rem" }}>{edu.institution}{edu.location ? ` | ${edu.location}` : ""}</Typography>
-                {edu.details && <Typography variant="body2" sx={{ color: "#666", mt: 0.5, fontSize: "0.85rem" }}>{edu.details}</Typography>}
-              </Box>
-            ))}
-          </Box>
-        )}
-
-        {data.certifications && data.certifications.length > 0 && (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
-              CERTIFICATIONS
-            </Typography>
-            <Box component="ul" sx={{ m: 0, pl: 0, listStyle: "none", color: "#333", "& li": { mb: 0.8, display: "flex", alignItems: "flex-start", fontSize: "0.88rem" } }}>
-              {data.certifications.map((cert, idx) => (
-                <Box component="li" key={idx}>
-                  <Box component="span" sx={{ color: "#2f5597", mr: 1, fontWeight: "bold", fontSize: "1.1rem", lineHeight: 1 }}>›</Box>
-                  <Box component="span"><Box component="span" sx={{ fontWeight: 600 }}>{cert.name}</Box>{cert.date ? ` — ${cert.date}` : ""}</Box>
-                </Box>
-              ))}
-            </Box>
-          </Box>
-        )}
-
-        {data.other && (
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 1.5, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
-              {data.other.label}
-            </Typography>
-            <Typography variant="body2" sx={{ color: "#333", lineHeight: 1.6, fontSize: "0.85rem" }}>
-              {data.other.value}
-            </Typography>
-          </Box>
-        )}
-      </Box>
-    </Paper>
-  );
-};
-
-const CoverLetterDisplay = ({ content, data }: { content?: string, data: CVData }) => {
-  return (
-    <Paper 
-      elevation={3}
-      sx={{ 
-        width: "100%", 
-        maxWidth: "210mm",
-        minHeight: "297mm", 
-        bgcolor: "#ffffff", 
-        color: "#000000",
-        p: { xs: 4, md: "20mm" },
-        borderRadius: 0,
-        fontFamily: "'Inter', sans-serif",
-        position: "relative",
-        // Page break indicators
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          pointerEvents: "none",
-          backgroundImage: `linear-gradient(to bottom, transparent 296.5mm, #e5e7eb 296.5mm, #e5e7eb 297mm, transparent 297mm)`,
-          backgroundSize: "100% 297mm",
-          zIndex: 10
-        }
-      }}
-    >
-      {/* Page Break Label Overlay */}
-      <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 11 }}>
-        {[1, 2].map((page) => (
-          <Box 
-            key={page} 
-            sx={{ 
-              position: "absolute", 
-              top: `${page * 297}mm`, 
-              right: "10mm", 
-              transform: "translateY(-100%)",
-              display: "flex",
-              alignItems: "center",
-              gap: 1
-            }}
-          >
-            <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 500, bgcolor: "white", px: 1 }}>
-              PAGE {page} END
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-      <Box sx={{ position: "relative", zIndex: 1 }}>
-        <DocumentHeader data={data} />
-        <Box sx={{ mt: 6 }}>
-          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", color: "#333", lineHeight: 1.9, fontSize: "0.95rem" }}>
-            {content || `Dear Hiring Manager,\n\nI am writing to express my interest in the position at your company. With my background in software engineering, I am confident that I would be a valuable asset to your team.\n\nBest regards,\n${data.name}`}
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
+    </Box>
   );
 };
 
@@ -392,36 +223,9 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
       </Box>
 
       <Grid container spacing={3}>
-        {/* Left Column: Job Details & AI Chat */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        {/* Left Column: AI Chat */}
+        <Grid size={{ xs: 12, md: 3 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, height: "calc(100vh - 180px)", position: "sticky", top: 20 }}>
-            {/* Job Details Card */}
-            <Card sx={{ bgcolor: "background.paper", borderRadius: 2 }}>
-              <CardContent>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-                  <WorkIcon sx={{ color: "#10b981" }} />
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>Job Details</Typography>
-                </Box>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>Role</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 2 }}>{job.role}</Typography>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>Company</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600, mb: 2 }}>{job.company}</Typography>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>Description</Typography>
-                <Box sx={{ 
-                  maxHeight: "200px", 
-                  overflowY: "auto", 
-                  bgcolor: "rgba(255,255,255,0.03)", 
-                  p: 1.5, 
-                  borderRadius: 1,
-                  fontSize: "0.85rem",
-                  color: "text.secondary",
-                  whiteSpace: "pre-wrap"
-                }}>
-                  {job.jobDescription || "No description provided."}
-                </Box>
-              </CardContent>
-            </Card>
-
             {/* AI Chat Card */}
             <Card sx={{ flexGrow: 1, display: "flex", flexDirection: "column", bgcolor: "background.paper", borderRadius: 2, overflow: "hidden" }}>
               <Box sx={{ p: 2, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -483,25 +287,43 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
         </Grid>
 
         {/* Right Column: Previews */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Box sx={{ bgcolor: "background.paper", borderRadius: 2, overflow: "hidden" }}>
+        <Grid size={{ xs: 12, md: 9 }}>
+          <Box sx={{ bgcolor: "background.paper", borderRadius: 2, overflow: "hidden", minHeight: "calc(100vh - 180px)" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", px: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)} sx={{ "& .MuiTab-root": { py: 2 } }}>
                 <Tab icon={<DescriptionIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Curriculum Vitae" />
                 <Tab icon={<EditIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Cover Letter" />
+                <Tab icon={<WorkIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Job Details" />
               </Tabs>
               <Box sx={{ display: "flex", gap: 1 }}>
-                <Button variant="contained" size="small" startIcon={<FileDownloadIcon />} sx={{ bgcolor: "#10b981" }}>
-                  Export PDF
-                </Button>
+                <PDFDownloadLink document={<CVPdfDocument data={localCvData} />} fileName={`CV_${localCvData.name.replace(/\s+/g, '_')}.pdf`} style={{ textDecoration: 'none' }}>
+                  {({ loading }: { loading: boolean }) => (
+                    <Button component="span" variant="contained" size="small" startIcon={<FileDownloadIcon />} sx={{ bgcolor: "#10b981" }} disabled={loading}>
+                      {loading ? "Preparing CV..." : "Download CV"}
+                    </Button>
+                  )}
+                </PDFDownloadLink>
+                <PDFDownloadLink document={<CoverLetterPdfDocument content={localCvData.coverLetter} data={localCvData} />} fileName={`Cover_Letter_${localCvData.name.replace(/\s+/g, '_')}.pdf`} style={{ textDecoration: 'none' }}>
+                  {({ loading }: { loading: boolean }) => (
+                    <Button component="span" variant="outlined" size="small" startIcon={<FileDownloadIcon />} sx={{ color: "#10b981", borderColor: "#10b981" }} disabled={loading}>
+                      {loading ? "Preparing Cover Letter..." : "Download Cover Letter"}
+                    </Button>
+                  )}
+                </PDFDownloadLink>
               </Box>
             </Box>
 
-            <Box sx={{ p: 4, bgcolor: "#1e1e24", display: "flex", justifyContent: "center", minHeight: "800px" }}>
+            <Box sx={{ p: 4, bgcolor: tabValue === 2 ? "transparent" : "#1e1e24", display: "flex", justifyContent: "center", minHeight: "800px" }}>
               {tabValue === 0 ? (
-                <CVDisplay data={localCvData} />
+                <PDFViewer width="100%" height="800px" style={{ border: "none", borderRadius: "8px" }}>
+                  <CVPdfDocument data={localCvData} />
+                </PDFViewer>
+              ) : tabValue === 1 ? (
+                <PDFViewer width="100%" height="800px" style={{ border: "none", borderRadius: "8px" }}>
+                  <CoverLetterPdfDocument content={localCvData.coverLetter} data={localCvData} />
+                </PDFViewer>
               ) : (
-                <CoverLetterDisplay content={localCvData.coverLetter} data={localCvData} />
+                <JobDetailsTab job={job} profileId={profileId} jobId={jobId} onUpdate={(j) => setJob(prev => prev ? { ...prev, ...j } : j)} />
               )}
             </Box>
           </Box>
