@@ -1,10 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, use, useCallback } from "react";
-import { 
-  Box, Typography, Button, Grid, Card, CardContent, Chip, 
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, 
-  CircularProgress, Alert
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import WorkIcon from "@mui/icons-material/Work";
@@ -23,14 +34,19 @@ interface Job {
 export default function JobsPage({ params }: { params: Promise<{ profileId: string }> }) {
   const router = useRouter();
   const { profileId } = use(params);
-  
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [profileName, setProfileName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [openNewJob, setOpenNewJob] = useState(false);
-  const [newJobData, setNewJobData] = useState({ company: "", role: "", jobDescription: "", url: "" });
+  const [newJobData, setNewJobData] = useState({
+    company: "",
+    role: "",
+    jobDescription: "",
+    url: "",
+  });
   const [creating, setCreating] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
@@ -85,7 +101,9 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}
+      >
         <CircularProgress sx={{ color: "#10b981" }} />
       </Box>
     );
@@ -115,7 +133,10 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => { setDialogError(null); setOpenNewJob(true); }}
+          onClick={() => {
+            setDialogError(null);
+            setOpenNewJob(true);
+          }}
           sx={{
             background: "linear-gradient(to right, #10b981 0%, #059669 100%)",
             color: "#fff",
@@ -127,17 +148,38 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
       </Box>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Keep track of all your applications for this profile. Create a new job to instantly tailor a CV against the job description using AI.
+        Keep track of all your applications for this profile. Create a new job to instantly tailor a
+        CV against the job description using AI.
       </Typography>
 
-      {error && <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 4 }}>
+          {error}
+        </Alert>
+      )}
 
       {jobs.length === 0 && !error ? (
-        <Box sx={{ textAlign: "center", py: 8, bgcolor: "background.paper", borderRadius: 2, border: "1px dashed rgba(255,255,255,0.1)" }}>
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 8,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            border: "1px dashed rgba(255,255,255,0.1)",
+          }}
+        >
           <Typography variant="h6" color="text.secondary" gutterBottom>
             No job applications tracked yet
           </Typography>
-          <Button variant="outlined" color="primary" onClick={() => { setDialogError(null); setOpenNewJob(true); }} startIcon={<AddIcon />}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => {
+              setDialogError(null);
+              setOpenNewJob(true);
+            }}
+            startIcon={<AddIcon />}
+          >
             Track your first job
           </Button>
         </Box>
@@ -163,13 +205,26 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
                   },
                 }}
               >
-                <CardContent sx={{ display: "flex", flexGrow: 1, alignItems: "center", py: "16px !important" }}>
-                  <Box sx={{ p: 1, borderRadius: 1, bgcolor: "rgba(16,185,129,0.1)", color: "#10b981", mr: 3 }}>
+                <CardContent
+                  sx={{ display: "flex", flexGrow: 1, alignItems: "center", py: "16px !important" }}
+                >
+                  <Box
+                    sx={{
+                      p: 1,
+                      borderRadius: 1,
+                      bgcolor: "rgba(16,185,129,0.1)",
+                      color: "#10b981",
+                      mr: 3,
+                    }}
+                  >
                     <WorkIcon />
                   </Box>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      {job.role} <Typography component="span" variant="body1" color="text.secondary">at {job.company}</Typography>
+                      {job.role}{" "}
+                      <Typography component="span" variant="body1" color="text.secondary">
+                        at {job.company}
+                      </Typography>
                     </Typography>
                     <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                       <Typography variant="body2" color="text.secondary">
@@ -178,14 +233,17 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
                     </Box>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Chip 
-                      label={job.status} 
-                      size="small" 
-                      sx={{ 
-                        bgcolor: job.status === "Interviewing" ? "rgba(245, 158, 11, 0.1)" : "rgba(16, 185, 129, 0.1)", 
+                    <Chip
+                      label={job.status}
+                      size="small"
+                      sx={{
+                        bgcolor:
+                          job.status === "Interviewing"
+                            ? "rgba(245, 158, 11, 0.1)"
+                            : "rgba(16, 185, 129, 0.1)",
                         color: job.status === "Interviewing" ? "#f59e0b" : "#10b981",
-                        fontWeight: 500
-                      }} 
+                        fontWeight: 500,
+                      }}
                     />
                   </Box>
                 </CardContent>
@@ -196,38 +254,48 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
       )}
 
       {/* New Job Dialog */}
-      <Dialog open={openNewJob} onClose={() => setOpenNewJob(false)} maxWidth="md" fullWidth slotProps={{ paper: { sx: { bgcolor: "background.paper", backgroundImage: "none" } } }}>
+      <Dialog
+        open={openNewJob}
+        onClose={() => setOpenNewJob(false)}
+        maxWidth="md"
+        fullWidth
+        slotProps={{ paper: { sx: { bgcolor: "background.paper", backgroundImage: "none" } } }}
+      >
         <DialogTitle sx={{ fontWeight: 600 }}>Track & Tailor New Application</DialogTitle>
         <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          {dialogError && <Alert severity="error" sx={{ mb: 3 }}>{dialogError}</Alert>}
+          {dialogError && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {dialogError}
+            </Alert>
+          )}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 1 }}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 6 }}>
-                <TextField 
-                  fullWidth 
-                  label="Company Name" 
-                  variant="outlined" 
+                <TextField
+                  fullWidth
+                  label="Company Name"
+                  variant="outlined"
                   value={newJobData.company}
                   onChange={(e) => setNewJobData({ ...newJobData, company: e.target.value })}
                 />
               </Grid>
               <Grid size={{ xs: 6 }}>
-                <TextField 
-                  fullWidth 
-                  label="Job Title" 
-                  variant="outlined" 
+                <TextField
+                  fullWidth
+                  label="Job Title"
+                  variant="outlined"
                   value={newJobData.role}
                   onChange={(e) => setNewJobData({ ...newJobData, role: e.target.value })}
                 />
               </Grid>
             </Grid>
-            
-            <TextField 
-              fullWidth 
-              label="Job Description" 
-              variant="outlined" 
-              multiline 
-              rows={6} 
+
+            <TextField
+              fullWidth
+              label="Job Description"
+              variant="outlined"
+              multiline
+              rows={6}
               placeholder="Paste the job description here so AI can analyze and tailor your CV..."
               value={newJobData.jobDescription}
               onChange={(e) => setNewJobData({ ...newJobData, jobDescription: e.target.value })}
@@ -235,12 +303,17 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenNewJob(false)} sx={{ color: "text.secondary" }}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button onClick={() => setOpenNewJob(false)} sx={{ color: "text.secondary" }}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
             disabled={creating || !newJobData.company || !newJobData.role}
             onClick={handleCreateJob}
-            sx={{ background: "linear-gradient(to right, #10b981 0%, #059669 100%)", color: "#fff" }}
+            sx={{
+              background: "linear-gradient(to right, #10b981 0%, #059669 100%)",
+              color: "#fff",
+            }}
           >
             {creating ? "Creating..." : "Tailor CV with AI"}
           </Button>

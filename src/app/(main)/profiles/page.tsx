@@ -1,9 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { 
-  Box, Typography, Button, Grid, Card, CardContent, CardActionArea, CardActions, 
-  Chip, CircularProgress, Alert, Dialog, DialogTitle, DialogContent, 
-  DialogActions, TextField, IconButton 
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea,
+  CardActions,
+  Chip,
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import PersonIcon from "@mui/icons-material/Person";
@@ -115,7 +129,9 @@ export default function ProfilesPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+      <Box
+        sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}
+      >
         <CircularProgress sx={{ color: "#10b981" }} />
       </Box>
     );
@@ -142,20 +158,38 @@ export default function ProfilesPage() {
       </Box>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        Manage your foundational profiles. Select a profile to start tracking and tailoring job applications for it.
+        Manage your foundational profiles. Select a profile to start tracking and tailoring job
+        applications for it.
       </Typography>
 
-      {error && <Alert severity="error" sx={{ mb: 4 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 4 }}>
+          {error}
+        </Alert>
+      )}
 
       {profiles.length === 0 && !error ? (
-        <Box sx={{ textAlign: "center", py: 8, bgcolor: "background.paper", borderRadius: 2, border: "1px dashed rgba(255,255,255,0.1)" }}>
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 8,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            border: "1px dashed rgba(255,255,255,0.1)",
+          }}
+        >
           <Typography variant="h6" color="text.secondary" gutterBottom>
             No profiles found
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Upload your first CV to create a base profile.
           </Typography>
-          <Button variant="outlined" color="primary" onClick={handleCreateProfile} startIcon={<AddIcon />}>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleCreateProfile}
+            startIcon={<AddIcon />}
+          >
             Upload CV
           </Button>
         </Box>
@@ -204,15 +238,23 @@ export default function ProfilesPage() {
                           {profile.name}
                         </Typography>
                       </Box>
-                      <Chip label={role} size="small" sx={{ mb: 2, bgcolor: "rgba(255,255,255,0.05)" }} />
+                      <Chip
+                        label={role}
+                        size="small"
+                        sx={{ mb: 2, bgcolor: "rgba(255,255,255,0.05)" }}
+                      />
                       {profile.description && (
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                          mb: 2, 
-                          display: "-webkit-box", 
-                          WebkitLineClamp: 2, 
-                          WebkitBoxOrient: "vertical", 
-                          overflow: "hidden" 
-                        }}>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            mb: 2,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
                           {profile.description}
                         </Typography>
                       )}
@@ -222,8 +264,23 @@ export default function ProfilesPage() {
                     </CardContent>
                   </CardActionArea>
                   <CardActions sx={{ px: 2, pb: 2, pt: 0, justifyContent: "space-between" }}>
-                    <Button size="small" onClick={(e) => { e.stopPropagation(); router.push(`/profiles/${profile.id}/edit`); }} sx={{ color: "#10b981" }}>Edit Profile</Button>
-                    <Button size="small" onClick={(e) => handlePreview(e, profile)} sx={{ color: "text.secondary" }}>Preview</Button>
+                    <Button
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/profiles/${profile.id}/edit`);
+                      }}
+                      sx={{ color: "#10b981" }}
+                    >
+                      Edit Profile
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={(e) => handlePreview(e, profile)}
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Preview
+                    </Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -233,21 +290,29 @@ export default function ProfilesPage() {
       )}
 
       {/* --------- Create Profile Dialog --------- */}
-      <Dialog 
-        open={createDialogOpen} 
+      <Dialog
+        open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
         maxWidth="sm"
         fullWidth
         slotProps={{ paper: { sx: { bgcolor: "background.paper", backgroundImage: "none" } } }}
       >
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>Create New Profile</Typography>
+        <DialogTitle
+          sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Create New Profile
+          </Typography>
           <IconButton onClick={() => setCreateDialogOpen(false)} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          {dialogError && <Alert severity="error" sx={{ mb: 3 }}>{dialogError}</Alert>}
+          {dialogError && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {dialogError}
+            </Alert>
+          )}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 1 }}>
             <TextField
               label="Profile Name"
@@ -267,48 +332,51 @@ export default function ProfilesPage() {
               onChange={(e) => setNewDescription(e.target.value)}
               variant="outlined"
             />
-            
+
             <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Base CV / Resume</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                Base CV / Resume
+              </Typography>
               {!selectedFile ? (
                 <Button
                   component="label"
                   variant="outlined"
                   fullWidth
                   startIcon={<CloudUploadIcon />}
-                  sx={{ 
-                    py: 4, 
-                    borderStyle: "dashed", 
+                  sx={{
+                    py: 4,
+                    borderStyle: "dashed",
                     borderColor: "rgba(255,255,255,0.2)",
                     bgcolor: "transparent",
-                    "&:hover": { borderColor: "#10b981" }
+                    "&:hover": { borderColor: "#10b981" },
                   }}
                 >
                   Click to upload or drag and drop (PDF, DOCX, TXT)
-                  <input
-                    type="file"
-                    hidden
-                    accept=".pdf,.docx,.txt"
-                    onChange={handleFileChange}
-                  />
+                  <input type="file" hidden accept=".pdf,.docx,.txt" onChange={handleFileChange} />
                 </Button>
               ) : (
-                <Box sx={{ 
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "space-between",
-                  p: 2, 
-                  border: "1px solid #10b981", 
-                  borderRadius: 1,
-                  bgcolor: "rgba(16,185,129,0.05)"
-                }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    p: 2,
+                    border: "1px solid #10b981",
+                    borderRadius: 1,
+                    bgcolor: "rgba(16,185,129,0.05)",
+                  }}
+                >
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <CloudUploadIcon sx={{ color: "#10b981", mr: 2 }} />
                     <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary" }}>
                       {selectedFile.name}
                     </Typography>
                   </Box>
-                  <IconButton size="small" onClick={() => setSelectedFile(null)} sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => setSelectedFile(null)}
+                    sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}
+                  >
                     <CloseIcon />
                   </IconButton>
                 </Box>
@@ -324,11 +392,11 @@ export default function ProfilesPage() {
             variant="contained"
             disabled={uploading}
             onClick={handleUpload}
-            sx={{ 
-              background: "linear-gradient(to right, #10b981 0%, #059669 100%)", 
+            sx={{
+              background: "linear-gradient(to right, #10b981 0%, #059669 100%)",
               color: "#fff",
               px: 4,
-              fontWeight: 600
+              fontWeight: 600,
             }}
           >
             {uploading ? "Parsing CV..." : "Create Profile"}
@@ -336,10 +404,10 @@ export default function ProfilesPage() {
         </DialogActions>
       </Dialog>
 
-      <CVPreviewer 
-        open={previewOpen} 
-        onClose={() => setPreviewOpen(false)} 
-        cvData={selectedProfileData} 
+      <CVPreviewer
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        cvData={selectedProfileData}
       />
     </Box>
   );

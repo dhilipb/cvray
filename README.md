@@ -12,12 +12,28 @@ A Next.js application for rendering and managing CVs and Cover Letters, with sup
 - **AI:** Google Gemini
 - **Language:** TypeScript (Strict ESLint with deprecation checks)
 
+## Development Workflow
+
+This project uses **ESLint**, **TypeScript (TSC)**, and **Prettier** to maintain code quality. These checks are automatically run before every commit using **Husky**.
+
+### Available Scripts
+
+- `yarn lint`: Run Next.js linting.
+- `yarn type-check`: Run TypeScript type checking.
+- `yarn format`: Format the codebase with Prettier.
+- `yarn format:check`: Check if the codebase follows Prettier formatting.
+- `yarn check-all`: Run all the above checks (Lint + TSC + Prettier Check).
+
+### Pre-commit Hook
+
+A Husky pre-commit hook is configured to run `yarn check-all` before any commit. If any check fails, the commit will be blocked.
+
 ## Getting Started
 
 First, install the dependencies:
 
 ```bash
-pnpm install
+yarn install
 ```
 
 Set up your environment variables by copying `.env.example` to `.env` and filling in the values:
@@ -26,16 +42,17 @@ Set up your environment variables by copying `.env.example` to `.env` and fillin
 cp .env.example .env
 ```
 
-Sync the database:
+Sync the database and generate the Prisma client:
 
 ```bash
 npx prisma db push
+npx prisma generate
 ```
 
 Then, run the development server:
 
 ```bash
-pnpm dev
+yarn dev
 ```
 
 Open [http://localhost:3344](http://localhost:3344) with your browser to see the result.

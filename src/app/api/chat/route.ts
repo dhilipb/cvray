@@ -13,13 +13,7 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const {
-      messages,
-      jobId,
-      profileId: _profileId,
-      cvData,
-      jobDescription,
-    } = await req.json();
+    const { messages, jobId, profileId: _profileId, cvData, jobDescription } = await req.json();
 
     const google = createGoogleGenerativeAI({
       apiKey: process.env.GEMINI_API_KEY || "",
@@ -43,8 +37,7 @@ export async function POST(req: Request) {
       If the user just asks a question, answer it normally.`,
       tools: {
         updateCV: tool({
-          description:
-            "Update the CV data with new information or modifications.",
+          description: "Update the CV data with new information or modifications.",
           inputSchema: cvSchema,
           execute: async (newCvData) => {
             // Persist the change
@@ -60,9 +53,7 @@ export async function POST(req: Request) {
         updateCoverLetter: tool({
           description: "Update the cover letter text.",
           inputSchema: z.object({
-            content: z
-              .string()
-              .describe("The full text of the updated cover letter"),
+            content: z.string().describe("The full text of the updated cover letter"),
           }),
           execute: async ({ content }) => {
             // Get current CV data to merge with cover letter
@@ -96,8 +87,7 @@ export async function POST(req: Request) {
     });
   } catch (error: unknown) {
     console.error("Chat API Error:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal server error";
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
     });

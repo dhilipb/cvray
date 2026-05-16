@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const { output: parsedJson } = await generateText({
       model: google("gemini-1.5-flash"),
       output: Output.object({
-        schema: cvSchema
+        schema: cvSchema,
       }),
       messages: [
         {
@@ -108,9 +108,6 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error("CV Upload Error:", error);
     const errorMessage = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

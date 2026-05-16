@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ profileId: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ profileId: string }> },
+) {
   try {
     const { profileId } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -22,24 +25,27 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prof
     });
 
     if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, profile });
   } catch (error: unknown) {
-    console.error('Fetch Profile Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    console.error("Fetch Profile Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ profileId: string }> }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ profileId: string }> },
+) {
   try {
     const { profileId } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -60,8 +66,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
 
     return NextResponse.json({ success: true, profile });
   } catch (error: unknown) {
-    console.error('Update Profile Error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    console.error("Update Profile Error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

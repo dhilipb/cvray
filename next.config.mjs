@@ -1,8 +1,8 @@
-import { GeminiWebpackPlugin } from './scripts/gemini-webpack-plugin.mjs';
+import { GeminiWebpackPlugin } from "./scripts/gemini-webpack-plugin.mjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@react-pdf/renderer'],
+  transpilePackages: ["@react-pdf/renderer"],
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
       config.plugins.push(new GeminiWebpackPlugin());

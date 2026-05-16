@@ -1,12 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Box,
-  AppBar,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import { Box, AppBar, Toolbar, Typography } from "@mui/material";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePathname } from "next/navigation";
 
@@ -15,7 +10,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const isFullWidth = pathname?.includes("/cv");
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default", flexDirection: "column" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: "background.default",
+        flexDirection: "column",
+      }}
+    >
       <AppBar
         position="fixed"
         sx={{
@@ -36,7 +38,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               letterSpacing: 1,
-              mr: 4
+              mr: 4,
             }}
           >
             CVRay
@@ -45,7 +47,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <UserMenu />
         </Toolbar>
       </AppBar>
-      
+
       <Box
         component="main"
         sx={{
@@ -54,7 +56,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           pt: 12, // Offset for the fixed AppBar
           maxWidth: isFullWidth ? "100%" : "1200px",
           width: "100%",
-          mx: "auto"
+          mx: "auto",
         }}
       >
         {children}

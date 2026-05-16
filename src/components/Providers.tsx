@@ -11,9 +11,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <SessionProvider>
       <AppRouterCacheProvider>
-        <ThemeRegistry>
-          {children}
-        </ThemeRegistry>
+        <ThemeRegistry>{children}</ThemeRegistry>
       </AppRouterCacheProvider>
     </SessionProvider>
   );

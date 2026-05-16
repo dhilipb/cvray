@@ -8,12 +8,7 @@ export class GeminiWebpackPlugin {
 
   apply(compiler) {
     compiler.hooks.done.tap("GeminiWebpackPlugin", (stats) => {
-      if (
-        !stats.hasErrors() ||
-        this.geminiInProgress ||
-        process.env.SKIP_GEMINI
-      )
-        return;
+      if (!stats.hasErrors() || this.geminiInProgress || process.env.SKIP_GEMINI) return;
 
       const info = stats.toJson({
         all: false,
@@ -31,9 +26,7 @@ export class GeminiWebpackPlugin {
       if (!errors) return;
 
       this.geminiInProgress = true;
-      console.log(
-        "\n[Gemini Plugin] Compilation errors detected. Launching Gemini...\n",
-      );
+      console.log("\n[Gemini Plugin] Compilation errors detected. Launching Gemini...\n");
 
       const gemini = spawn(
         "gemini",

@@ -6,7 +6,12 @@
     "dev": "PORT=3344 next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check-all": "yarn lint && yarn type-check && yarn format:check",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.75",
@@ -44,10 +49,12 @@
     "@typescript-eslint/parser": "^8.59.3",
     "eslint": "^9.0.0",
     "eslint-config-next": "15.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-deprecation": "^3.0.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.3",
     "prisma": "^7.8.0",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.59.3"
-  },
-  "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
+  }
 }

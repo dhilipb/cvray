@@ -43,8 +43,18 @@ export const UserMenu = () => {
   if (status === "loading") {
     return (
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Skeleton variant="text" width={100} height={24} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
-        <Skeleton variant="circular" width={32} height={32} sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
+        <Skeleton
+          variant="text"
+          width={100}
+          height={24}
+          sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+        />
+        <Skeleton
+          variant="circular"
+          width={32}
+          height={32}
+          sx={{ bgcolor: "rgba(255,255,255,0.1)" }}
+        />
       </Box>
     );
   }

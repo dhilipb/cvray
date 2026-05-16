@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const workExperienceSchema = z.object({
   role: z.string(),
   company: z.string(),
-  client: z.string().optional().default(''),
+  client: z.string().optional().default(""),
   dates: z.string(),
   bulletPoints: z.array(z.string()),
   sectionHeader: z.string().optional(),
@@ -40,10 +40,12 @@ export const cvSchema = z.object({
   education: z.array(educationSchema),
   certifications: z.array(certificationSchema),
   coverLetter: z.string().optional(),
-  other: z.object({
-    label: z.string(),
-    value: z.string(),
-  }).optional(),
+  other: z
+    .object({
+      label: z.string(),
+      value: z.string(),
+    })
+    .optional(),
   fullText: z.string().optional().describe("The full extracted text from the CV"),
 });
 

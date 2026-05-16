@@ -15,12 +15,16 @@ const eslintConfig = [
   },
   ...compat.extends("next/core-web-vitals"),
   ...compat.extends("plugin:@typescript-eslint/recommended"),
+  ...compat.extends("prettier"),
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
       "@typescript-eslint/no-deprecated": "error",
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/ban-ts-comment": "error",
     },
     languageOptions: {
