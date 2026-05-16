@@ -5,9 +5,6 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
-    const pdfParseModule = await import('pdf-parse');
-    // @ts-ignore
-    const pdfParse = pdfParseModule.default || pdfParseModule;
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
@@ -20,7 +17,10 @@ export async function POST(req: NextRequest) {
 
     let text = '';
     if (file.type === 'application/pdf') {
-      const data = await pdfParse(buffer);
+      // Dynamic import to avoid build-time issues with pdf-parse
+      const pdf = (await import('pdf-parse')).default;
+      // @ts-ignore - pdf-parse types can be tricky with dynamic imports
+      const data = await pdf(buffer);
       text = data.text;
     } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       const result = await mammoth.extractRawText({ buffer });
