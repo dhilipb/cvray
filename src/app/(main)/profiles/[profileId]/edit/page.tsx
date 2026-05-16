@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from "react";
 import { 
   Box, Typography, Button, TextField, Grid, Card, CardContent, 
   IconButton, Stack, CircularProgress, Alert,
-  Fab, Tooltip
+  Fab, Tooltip, FormControlLabel, Switch
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
@@ -106,7 +106,6 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
 
   const handleExperienceChange = (index: number, field: keyof WorkExperience, value: string | string[] | boolean | undefined) => {
     const newExperience = [...cvData.experience];
-    // @ts-expect-error - dynamic key assignment
     newExperience[index] = { ...newExperience[index], [field]: value };
     setCvData(prev => ({ ...prev, experience: newExperience }));
   };
@@ -330,6 +329,19 @@ export default function ProfileEditPage({ params }: { params: Promise<{ profileI
                               size="small"
                               value={exp.client}
                               onChange={(e) => handleExperienceChange(expIdx, "client", e.target.value)}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12 }}>
+                            <FormControlLabel
+                              control={
+                                <Switch 
+                                  size="small"
+                                  checked={!!exp.break} 
+                                  onChange={(e) => handleExperienceChange(expIdx, "break", e.target.checked)} 
+                                  color="success"
+                                />
+                              }
+                              label={<Typography variant="caption">Force Page Break Before This Role</Typography>}
                             />
                           </Grid>
                         </Grid>

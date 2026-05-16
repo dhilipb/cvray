@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, useCallback } from "react";
 import { 
   Box, Typography, Button, Grid, Card, CardContent, Chip, 
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, 
@@ -28,34 +28,34 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
   const [profileName, setProfileName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [openNewJob, setOpenNewJob] = useState(false);
   const [newJobData, setNewJobData] = useState({ company: "", role: "", jobDescription: "", url: "" });
   const [creating, setCreating] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/profiles/${profileId}/jobs`);
-        const data = await res.json();
-        if (data.success) {
-          setJobs(data.jobs);
-          setProfileName(data.profileName);
-        } else {
-          setError(data.error || "Failed to fetch jobs");
-        }
-      } catch (err) {
-        setError("An error occurred while fetching jobs");
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchJobs = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/profiles/${profileId}/jobs`);
+      const data = await res.json();
+      if (data.success) {
+        setJobs(data.jobs);
+        setProfileName(data.profileName || "");
+      } else {
+        setError(data.error || "Failed to fetch jobs");
       }
-    };
-
-    fetchJobs();
+    } catch (err) {
+      setError("An error occurred while fetching jobs");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, [profileId]);
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   const handleCreateJob = async () => {
     try {
@@ -93,14 +93,21 @@ export default function JobsPage({ params }: { params: Promise<{ profileId: stri
 
   return (
     <Box>
-      <Button 
-        startIcon={<ArrowBackIcon />} 
+      <Button
+        startIcon={<ArrowBackIcon />}
         onClick={() => router.push("/profiles")}
-        sx={{ color: "text.secondary", mb: 2, "&:hover": { color: "text.primary" } }}
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+          boxShadow: "none",
+          "&:hover": {
+            boxShadow: "none",
+            color: "text.primary",
+          },
+        }}
       >
         Back to Profiles
       </Button>
-
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 800, color: "text.primary" }}>
           {profileName ? `${profileName} Applications` : "Job Tracking"}

@@ -15,10 +15,34 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { useRouter } from "next/navigation";
 import { useChat } from "@ai-sdk/react";
+import type { UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { CVData } from "@/lib/types";
 
 /* --------- Components --------- */
+
+const DocumentHeader = ({ data }: { data: CVData }) => (
+  <Box sx={{ mb: 4 }}>
+    <Typography variant="h3" sx={{ fontFamily: "'Georgia', 'Times New Roman', serif", fontWeight: 700, color: "#1a1a2e", mb: 0.5, letterSpacing: "-0.5px" }}>
+      {data.name}
+    </Typography>
+    <Typography variant="h6" sx={{ color: "#2f5597", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", mb: 1, fontSize: "1.1rem" }}>
+      {data.title}
+    </Typography>
+    
+    <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", fontSize: "0.85rem", color: "#666", mb: 1.5 }}>
+      {data.email && <Box component="span" sx={{ mr: 1.5 }}>{data.email}</Box>}
+      {data.email && data.phone && <Box component="span" sx={{ mr: 1.5, color: "#ccc" }}>•</Box>}
+      {data.phone && <Box component="span" sx={{ mr: 1.5 }}>{data.phone}</Box>}
+      {data.phone && data.location && <Box component="span" sx={{ mr: 1.5, color: "#ccc" }}>•</Box>}
+      {data.location && <Box component="span" sx={{ mr: 1.5 }}>{data.location}</Box>}
+      {data.location && data.linkedin && <Box component="span" sx={{ mr: 1.5, color: "#ccc" }}>•</Box>}
+      {data.linkedin && <Box component="span" sx={{ textDecoration: "underline" }}>{data.linkedin}</Box>}
+    </Box>
+
+    <Divider sx={{ borderWidth: 1.5, borderColor: "#2f5597" }} />
+  </Box>
+);
 
 const CVDisplay = ({ data }: { data: CVData }) => {
   return (
@@ -26,124 +50,235 @@ const CVDisplay = ({ data }: { data: CVData }) => {
       elevation={3}
       sx={{ 
         width: "100%", 
-        minHeight: "1000px", 
+        maxWidth: "210mm",
+        minHeight: "297mm", 
         bgcolor: "#ffffff", 
         color: "#000000",
-        p: 6,
-        borderRadius: 1,
-        fontFamily: "'Inter', sans-serif"
+        p: { xs: 4, md: "20mm" },
+        borderRadius: 0,
+        fontFamily: "'Inter', sans-serif",
+        position: "relative",
+        // Page break indicators
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          pointerEvents: "none",
+          backgroundImage: `linear-gradient(to bottom, transparent 296.5mm, #e5e7eb 296.5mm, #e5e7eb 297mm, transparent 297mm)`,
+          backgroundSize: "100% 297mm",
+          zIndex: 10
+        }
       }}
     >
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: "#111" }}>{data.name}</Typography>
-      <Typography variant="h6" sx={{ color: "#444", mb: 2 }}>{data.title}</Typography>
-      
-      <Box sx={{ display: "flex", gap: 2, mb: 3, flexWrap: "wrap", fontSize: "0.85rem", color: "#555" }}>
-        {data.email && <Typography variant="body2">{data.email}</Typography>}
-        {data.phone && <Typography variant="body2">{data.phone}</Typography>}
-        {data.location && <Typography variant="body2">{data.location}</Typography>}
-        {data.linkedin && <Typography variant="body2">{data.linkedin}</Typography>}
+      {/* Page Break Label Overlay */}
+      <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 11 }}>
+        {[1, 2, 3, 4].map((page) => (
+          <Box 
+            key={page} 
+            sx={{ 
+              position: "absolute", 
+              top: `${page * 297}mm`, 
+              right: "10mm", 
+              transform: "translateY(-100%)",
+              display: "flex",
+              alignItems: "center",
+              gap: 1
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 500, bgcolor: "white", px: 1 }}>
+              PAGE {page} END
+            </Typography>
+          </Box>
+        ))}
       </Box>
 
-      <Divider sx={{ mb: 3, borderColor: "#eee" }} />
-      
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#111", mb: 1.5, textTransform: "uppercase", letterSpacing: 1.2, borderLeft: "4px solid #10b981", pl: 1.5 }}>
-        Professional Summary
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 4, color: "#333", lineHeight: 1.7 }}>
-        {data.summary}
-      </Typography>
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <DocumentHeader data={data} />
 
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#111", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, borderLeft: "4px solid #10b981", pl: 1.5 }}>
-        Work Experience
-      </Typography>
-      {data.experience?.map((exp, idx) => (
-        <Box key={idx} sx={{ mb: 3.5 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 0.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#222" }}>{exp.role}</Typography>
-            <Typography variant="body2" sx={{ color: "#666", fontWeight: 600 }}>{exp.dates}</Typography>
+        {data.summary && (
+          <Box sx={{ borderLeft: "3px solid #2f5597", pl: 2, mb: 4 }}>
+            <Typography variant="body2" sx={{ color: "#333", lineHeight: 1.6, fontSize: "0.9rem" }}>
+              {data.summary}
+            </Typography>
           </Box>
-          <Typography variant="body2" sx={{ color: "#444", fontWeight: 700, mb: 1.5 }}>{exp.company}</Typography>
-          <Typography component="ul" sx={{ m: 0, pl: 2.5, color: "#333", "& li": { mb: 1, lineHeight: 1.6, fontSize: "0.88rem" } }}>
-            {exp.bulletPoints?.map((bp, bidx) => (
-              <li key={bidx}>{bp}</li>
-            ))}
-          </Typography>
-        </Box>
-      ))}
+        )}
 
-      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#111", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, borderLeft: "4px solid #10b981", pl: 1.5 }}>
-        Skills & Expertise
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        {data.skills?.map((skill, idx) => (
-          <Grid size={{ xs: 6 }} key={idx}>
-            <Typography variant="body2" sx={{ fontWeight: 700, color: "#333", mb: 0.5 }}>{skill.name}</Typography>
-            <Typography variant="body2" sx={{ color: "#555", fontSize: "0.85rem" }}>{skill.items}</Typography>
-          </Grid>
-        ))}
-      </Grid>
-
-      {data.education && data.education.length > 0 && (
-        <>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#111", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, borderLeft: "4px solid #10b981", pl: 1.5 }}>
-            Education
-          </Typography>
-          {data.education.map((edu, idx) => (
-            <Box key={idx} sx={{ mb: 2.5 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#222" }}>{edu.degree}</Typography>
-              <Typography variant="body2" sx={{ color: "#444", fontWeight: 500 }}>{edu.institution} | {edu.location}</Typography>
-              {edu.details && <Typography variant="body2" sx={{ color: "#666", mt: 0.5, fontSize: "0.85rem" }}>{edu.details}</Typography>}
+        {data.skills && data.skills.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 1.5, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
+              CORE COMPETENCIES
+            </Typography>
+            <Box sx={{ borderTop: "1px solid #eee", borderBottom: "1px solid #eee" }}>
+              {data.skills.map((skill, idx) => (
+                <Box key={idx} sx={{ display: "flex", py: 1.5, borderBottom: idx === data.skills!.length - 1 ? "none" : "1px solid #eee" }}>
+                  <Box sx={{ width: "25%", pr: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: "#2f5597", fontSize: "0.85rem" }}>{skill.name}</Typography>
+                  </Box>
+                  <Box sx={{ width: "75%" }}>
+                    <Typography variant="body2" sx={{ color: "#444", fontSize: "0.85rem", lineHeight: 1.5 }}>{skill.items}</Typography>
+                  </Box>
+                </Box>
+              ))}
             </Box>
-          ))}
-        </>
-      )}
+          </Box>
+        )}
 
-      {data.certifications && data.certifications.length > 0 && (
-        <>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#111", mt: 2, mb: 2, textTransform: "uppercase", letterSpacing: 1.2, borderLeft: "4px solid #10b981", pl: 1.5 }}>
-            Certifications
-          </Typography>
-          <Box component="ul" sx={{ m: 0, pl: 2.5, color: "#333", "& li": { mb: 0.8, fontSize: "0.88rem" } }}>
-            {data.certifications.map((cert, idx) => (
-              <li key={idx}>
-                <Box component="span" sx={{ fontWeight: 700 }}>{cert.name}</Box> — {cert.date}
-              </li>
+        {data.experience && data.experience.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
+              PROFESSIONAL EXPERIENCE
+            </Typography>
+            {data.experience.map((exp, idx) => (
+              <Box key={idx} sx={{ mb: 3.5, position: "relative" }}>
+                {exp.break && (
+                  <Box sx={{ 
+                    my: 4, 
+                    borderTop: "2px dashed #2f5597", 
+                    position: "relative",
+                    "&::after": {
+                      content: '"Manual Page Break"',
+                      position: "absolute",
+                      top: -10,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      bgcolor: "white",
+                      px: 2,
+                      color: "#2f5597",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      textTransform: "uppercase"
+                    }
+                  }} />
+                )}
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#222", fontSize: "1rem" }}>{exp.role}</Typography>
+                  <Typography variant="body2" sx={{ color: "#888", fontSize: "0.85rem", whiteSpace: "nowrap", ml: 2 }}>{exp.dates}</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ mb: 1.5, fontSize: "0.9rem" }}>
+                  <Box component="span" sx={{ color: "#666", fontWeight: 600 }}>{exp.company}</Box>
+                </Typography>
+                <Box component="ul" sx={{ m: 0, pl: 0, listStyle: "none", color: "#333", "& li": { mb: 0.8, display: "flex", alignItems: "flex-start", fontSize: "0.88rem", lineHeight: 1.5 } }}>
+                  {exp.bulletPoints?.map((bp, bidx) => (
+                    <Box component="li" key={bidx}>
+                      <Box component="span" sx={{ color: "#2f5597", mr: 1, fontWeight: "bold", fontSize: "1.1rem", lineHeight: 1 }}>›</Box>
+                      <Box component="span" dangerouslySetInnerHTML={{ __html: bp.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
             ))}
           </Box>
-        </>
-      )}
+        )}
 
-      {data.other && (
-        <>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#111", mt: 4, mb: 1.5, textTransform: "uppercase", letterSpacing: 1.2, borderLeft: "4px solid #10b981", pl: 1.5 }}>
-            {data.other.label}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#333", lineHeight: 1.6 }}>
-            {data.other.value}
-          </Typography>
-        </>
-      )}
+        {data.education && data.education.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
+              EDUCATION
+            </Typography>
+            {data.education.map((edu, idx) => (
+              <Box key={idx} sx={{ mb: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 0.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#222", fontSize: "0.95rem" }}>{edu.degree}</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ color: "#555", fontWeight: 600, fontSize: "0.85rem" }}>{edu.institution}{edu.location ? ` | ${edu.location}` : ""}</Typography>
+                {edu.details && <Typography variant="body2" sx={{ color: "#666", mt: 0.5, fontSize: "0.85rem" }}>{edu.details}</Typography>}
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {data.certifications && data.certifications.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 2, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
+              CERTIFICATIONS
+            </Typography>
+            <Box component="ul" sx={{ m: 0, pl: 0, listStyle: "none", color: "#333", "& li": { mb: 0.8, display: "flex", alignItems: "flex-start", fontSize: "0.88rem" } }}>
+              {data.certifications.map((cert, idx) => (
+                <Box component="li" key={idx}>
+                  <Box component="span" sx={{ color: "#2f5597", mr: 1, fontWeight: "bold", fontSize: "1.1rem", lineHeight: 1 }}>›</Box>
+                  <Box component="span"><Box component="span" sx={{ fontWeight: 600 }}>{cert.name}</Box>{cert.date ? ` — ${cert.date}` : ""}</Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {data.other && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#2f5597", mb: 1.5, textTransform: "uppercase", letterSpacing: 1.2, fontSize: "0.95rem" }}>
+              {data.other.label}
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#333", lineHeight: 1.6, fontSize: "0.85rem" }}>
+              {data.other.value}
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </Paper>
   );
 };
 
-const CoverLetterDisplay = ({ content, name }: { content?: string, name: string }) => {
+const CoverLetterDisplay = ({ content, data }: { content?: string, data: CVData }) => {
   return (
     <Paper 
       elevation={3}
       sx={{ 
         width: "100%", 
-        minHeight: "1000px", 
+        maxWidth: "210mm",
+        minHeight: "297mm", 
         bgcolor: "#ffffff", 
         color: "#000000",
-        p: 8,
-        borderRadius: 1,
-        fontFamily: "'Inter', sans-serif"
+        p: { xs: 4, md: "20mm" },
+        borderRadius: 0,
+        fontFamily: "'Inter', sans-serif",
+        position: "relative",
+        // Page break indicators
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          pointerEvents: "none",
+          backgroundImage: `linear-gradient(to bottom, transparent 296.5mm, #e5e7eb 296.5mm, #e5e7eb 297mm, transparent 297mm)`,
+          backgroundSize: "100% 297mm",
+          zIndex: 10
+        }
       }}
     >
-      <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", color: "#333", lineHeight: 1.9, fontSize: "0.95rem" }}>
-        {content || `Dear Hiring Manager,\n\nI am writing to express my interest in the position at your company. With my background in software engineering, I am confident that I would be a valuable asset to your team.\n\nBest regards,\n${name}`}
-      </Typography>
+      {/* Page Break Label Overlay */}
+      <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 11 }}>
+        {[1, 2].map((page) => (
+          <Box 
+            key={page} 
+            sx={{ 
+              position: "absolute", 
+              top: `${page * 297}mm`, 
+              right: "10mm", 
+              transform: "translateY(-100%)",
+              display: "flex",
+              alignItems: "center",
+              gap: 1
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 500, bgcolor: "white", px: 1 }}>
+              PAGE {page} END
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <DocumentHeader data={data} />
+        <Box sx={{ mt: 6 }}>
+          <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", color: "#333", lineHeight: 1.9, fontSize: "0.95rem" }}>
+            {content || `Dear Hiring Manager,\n\nI am writing to express my interest in the position at your company. With my background in software engineering, I am confident that I would be a valuable asset to your team.\n\nBest regards,\n${data.name}`}
+          </Typography>
+        </Box>
+      </Box>
     </Paper>
   );
 };
@@ -200,7 +335,7 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
         role: "assistant", 
         parts: [{ type: "text", text: "Hi! I'm your AI CV assistant. I can help you tailor your CV and cover letter for this specific role. What would you like to change?" }] 
       }
-    ]
+    ] as UIMessage[]
   });
 
   const handleChatSubmit = (e?: React.FormEvent) => {
@@ -239,13 +374,21 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
 
   return (
     <Box sx={{ pb: 8 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3, gap: 2 }}>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push(`/profiles/${profileId}/jobs`)} sx={{ color: "text.secondary" }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.push(`/profiles/${profileId}/jobs`)}
+          sx={{
+            color: "text.secondary",
+            boxShadow: "none",
+            "&:hover": {
+              boxShadow: "none",
+              color: "text.primary",
+            },
+          }}
+        >
           Back to Applications
         </Button>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          Tailoring CV for {job.role} @ {job.company}
-        </Typography>
       </Box>
 
       <Grid container spacing={3}>
@@ -358,7 +501,7 @@ export default function JobCVPage({ params }: { params: Promise<{ profileId: str
               {tabValue === 0 ? (
                 <CVDisplay data={localCvData} />
               ) : (
-                <CoverLetterDisplay content={localCvData.coverLetter} name={localCvData.name} />
+                <CoverLetterDisplay content={localCvData.coverLetter} data={localCvData} />
               )}
             </Box>
           </Box>

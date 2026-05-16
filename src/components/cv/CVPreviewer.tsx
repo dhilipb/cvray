@@ -80,22 +80,58 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
         </Box>
 
         {/* CV Document Container */}
-        <Box sx={{ flexGrow: 1, p: 4, overflowY: "auto", bgcolor: "#1e1e24", display: "flex", justifyContent: "center" }}>
+        <Box sx={{ flexGrow: 1, p: 4, overflowY: "auto", bgcolor: "#1e1e24", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
           <Paper 
             elevation={6}
             sx={{ 
               width: "100%", 
-              maxWidth: "800px", 
-              minHeight: "1000px", 
+              maxWidth: "210mm", 
+              minHeight: "297mm", 
               bgcolor: "#ffffff", 
               color: "#000000",
-              p: 6,
-              borderRadius: 1
+              p: "20mm",
+              borderRadius: 0,
+              position: "relative",
+              // Page break indicators
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                pointerEvents: "none",
+                backgroundImage: `linear-gradient(to bottom, transparent 296.5mm, #e5e7eb 296.5mm, #e5e7eb 297mm, transparent 297mm)`,
+                backgroundSize: "100% 297mm",
+                zIndex: 10
+              }
             }}
           >
+            {/* Page Break Label Overlay */}
+            <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 11 }}>
+              {[1, 2, 3, 4].map((page) => (
+                <Box 
+                  key={page} 
+                  sx={{ 
+                    position: "absolute", 
+                    top: `${page * 297}mm`, 
+                    right: "10mm", 
+                    transform: "translateY(-100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: "#9ca3af", fontWeight: 500, bgcolor: "white", px: 1 }}>
+                    PAGE {page} END
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
             {/* Render dynamic CV data if available */}
             {cvData ? (
-              <Box>
+              <Box sx={{ position: "relative", zIndex: 1 }}>
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: "#111" }}>{cvData.name}</Typography>
                 <Typography variant="h6" sx={{ color: "#444", mb: 3 }}>{cvData.title}</Typography>
                 <Divider sx={{ mb: 3, borderColor: "#ccc" }} />
@@ -107,7 +143,27 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
 
                 <Typography variant="h6" sx={{ fontWeight: 600, color: "#222", mb: 1 }}>Experience</Typography>
                 {cvData.experience?.map((exp: WorkExperience, idx: number) => (
-                  <Box key={idx} sx={{ mb: 3 }}>
+                  <Box key={idx} sx={{ mb: 3, position: "relative" }}>
+                    {exp.break && (
+                      <Box sx={{ 
+                        my: 4, 
+                        borderTop: "2px dashed #10b981", 
+                        position: "relative",
+                        "&::after": {
+                          content: '"Manual Page Break"',
+                          position: "absolute",
+                          top: -10,
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          bgcolor: "white",
+                          px: 2,
+                          color: "#10b981",
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          textTransform: "uppercase"
+                        }
+                      }} />
+                    )}
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#222" }}>{exp.role} - {exp.company}</Typography>
                     <Typography variant="body2" sx={{ color: "#555", mb: 1 }}>{exp.dates}</Typography>
                     <Typography component="div" sx={{ m: 0, pl: 3, color: "#333", "& .bullet-item": { mb: 0.5, display: 'list-item' } }}>
@@ -121,7 +177,7 @@ export default function CVPreviewer({ open, onClose, cvData, jobContext }: CVPre
                 ))}
               </Box>
             ) : (
-              <Box>
+              <Box sx={{ position: "relative", zIndex: 1 }}>
                 <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: "#111" }}>Sakthi Buddha</Typography>
                 <Typography variant="h6" sx={{ color: "#444", mb: 3 }}>Senior QA Engineer</Typography>
                 <Divider sx={{ mb: 3, borderColor: "#ccc" }} />

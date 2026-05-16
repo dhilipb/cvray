@@ -1,4 +1,4 @@
-import { renderToBuffer } from '@react-pdf/renderer';
+import { renderToBuffer, DocumentProps } from '@react-pdf/renderer';
 import { NextRequest, NextResponse } from 'next/server';
 import { CVCoverLetter } from '../../_components/CVCoverLetter';
 import { CVResume } from '../../_components/CVResume';
@@ -15,14 +15,14 @@ export async function GET(req: NextRequest) {
 		// Ensure fonts are registered on the server
 		await registerFonts();
 
-		let element;
+		let element: React.ReactElement<DocumentProps>;
 		if (type === 'coverletter') {
-			element = React.createElement(CVCoverLetter, { data: cvData, isHeadhunterMode });
+			element = React.createElement(CVCoverLetter, { data: cvData, isHeadhunterMode }) as React.ReactElement<DocumentProps>;
 		} else {
-			element = React.createElement(CVResume, { data: cvData, isHeadhunterMode });
+			element = React.createElement(CVResume, { data: cvData, isHeadhunterMode }) as React.ReactElement<DocumentProps>;
 		}
 
-		const buffer = await renderToBuffer(element as React.ReactElement);
+		const buffer = await renderToBuffer(element);
 
 		const fileNameSuffix = isHeadhunterMode ? 'Candidate' : 'Sakthi_Buddha';
 		const fileName = type === 'coverletter' ? `Cover_Letter_${fileNameSuffix}.pdf` : `CV_${fileNameSuffix}.pdf`;

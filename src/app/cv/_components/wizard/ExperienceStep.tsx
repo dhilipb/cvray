@@ -1,4 +1,4 @@
-import { TextField, Typography, Box, Button, IconButton, Stack, Paper, Grid } from '@mui/material';
+import { TextField, Typography, Box, Button, IconButton, Stack, Paper, Grid, FormControlLabel, Switch } from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
 import { CVData, WorkExperience } from '@/lib/types';
 
@@ -102,6 +102,20 @@ export function ExperienceStep({ data, updateData }: Props) {
 								value={exp.dates}
 								onChange={(e) => handleExperienceChange(index, 'dates', e.target.value)}
 								variant="outlined"
+							/>
+						</Grid>
+
+						<Grid size={12}>
+							<FormControlLabel
+								control={
+									<Switch
+										size="small"
+										checked={!!exp.break}
+										onChange={(e) => handleExperienceChange(index, 'break', e.target.checked)}
+										color="primary"
+									/>
+								}
+								label={<Typography variant="caption">Force Page Break Before This Role</Typography>}
 							/>
 						</Grid>
 
