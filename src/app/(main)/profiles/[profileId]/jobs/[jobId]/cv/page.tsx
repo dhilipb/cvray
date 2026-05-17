@@ -11,7 +11,9 @@ import {
   Tabs,
   Tab,
   TextField,
-  Card,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import WorkIcon from "@mui/icons-material/Work";
@@ -34,7 +36,6 @@ import {
   CreativeCV,
   CreativeCoverLetter,
 } from "@/components/cv/templates";
-import StyleIcon from "@mui/icons-material/Style";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import CropFreeIcon from "@mui/icons-material/CropFree";
@@ -277,17 +278,28 @@ export default function JobCVPage({
   const CoverLetterComponent = TEMPLATES[templateId].coverLetter;
 
   return (
-    <Box sx={{ pb: 4 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 0.75,
+          px: 2,
+          bgcolor: "background.paper",
+          borderBottom: 1,
+          borderColor: "divider",
+        }}
+      >
         <Button
-          startIcon={<ArrowBackIcon />}
+          startIcon={<ArrowBackIcon sx={{ fontSize: "1rem !important" }} />}
           onClick={() => router.push(`/profiles/${profileId}/jobs`)}
           size="small"
           sx={{
             color: "text.secondary",
             boxShadow: "none",
-            py: 0.5,
+            py: 0.25,
             px: 1,
+            fontSize: "0.75rem",
             "&:hover": {
               boxShadow: "none",
               color: "text.primary",
@@ -298,17 +310,17 @@ export default function JobCVPage({
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
+      <Grid container sx={{ flexGrow: 1, overflow: "hidden" }}>
         {/* Left Column: AI Chat */}
-        <Grid size={{ xs: 12, md: 3 }}>
+        <Grid
+          size={{ xs: 12, md: 3 }}
+          sx={{ height: "100%", borderRight: 1, borderColor: "divider" }}
+        >
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: 3,
-              height: "calc(100vh - 180px)",
-              position: "sticky",
-              top: 20,
+              height: "100%",
             }}
           >
             <AIChatAssistant
@@ -325,13 +337,13 @@ export default function JobCVPage({
         </Grid>
 
         {/* Right Column: Previews */}
-        <Grid size={{ xs: 12, md: 9 }}>
+        <Grid size={{ xs: 12, md: 9 }} sx={{ height: "100%" }}>
           <Box
             sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
               bgcolor: "background.paper",
-              borderRadius: 2,
-              overflow: "hidden",
-              minHeight: "calc(100vh - 180px)",
             }}
           >
             <Box
@@ -342,146 +354,162 @@ export default function JobCVPage({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                minHeight: 40,
               }}
             >
               <Tabs
                 value={tabValue}
                 onChange={(_, v) => setTabValue(v)}
-                sx={{ "& .MuiTab-root": { py: 2 } }}
+                sx={{
+                  minHeight: 40,
+                  "& .MuiTab-root": {
+                    py: 1,
+                    px: 2,
+                    minHeight: 40,
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    textTransform: "none",
+                  },
+                }}
               >
                 <Tab
-                  icon={<DescriptionIcon sx={{ fontSize: "1.1rem" }} />}
+                  icon={<DescriptionIcon sx={{ fontSize: "1rem" }} />}
                   iconPosition="start"
-                  label="Curriculum Vitae"
+                  label="CV"
                 />
                 <Tab
-                  icon={<EditIcon sx={{ fontSize: "1.1rem" }} />}
+                  icon={<EditIcon sx={{ fontSize: "1rem" }} />}
                   iconPosition="start"
                   label="Cover Letter"
                 />
                 <Tab
-                  icon={<StyleIcon sx={{ fontSize: "1.1rem" }} />}
-                  iconPosition="start"
-                  label="Templates"
-                />
-                <Tab
-                  icon={<WorkIcon sx={{ fontSize: "1.1rem" }} />}
+                  icon={<WorkIcon sx={{ fontSize: "1rem" }} />}
                   iconPosition="start"
                   label="Job Details"
                 />
               </Tabs>
-              <Box sx={{ display: "flex", gap: 1 }}>
-                {tabValue === 0 && (
-                  <PDFDownloadLink
-                    document={<CVComponent data={localCvData} />}
-                    fileName="cv.pdf"
-                    style={{ textDecoration: "none" }}
-                  >
-                    {({ loading }: { loading: boolean }) => (
-                      <Button
-                        component="span"
-                        variant="contained"
-                        size="small"
-                        startIcon={<FileDownloadIcon />}
-                        sx={{ bgcolor: "#10b981" }}
-                        disabled={loading}
-                      >
-                        {loading ? "Preparing..." : "Download CV"}
-                      </Button>
-                    )}
-                  </PDFDownloadLink>
-                )}
-                {tabValue === 1 && (
-                  <PDFDownloadLink
-                    document={
-                      <CoverLetterComponent content={localCvData.coverLetter} data={localCvData} />
-                    }
-                    fileName="cover-letter.pdf"
-                    style={{ textDecoration: "none" }}
-                  >
-                    {({ loading }: { loading: boolean }) => (
-                      <Button
-                        component="span"
-                        variant="contained"
-                        size="small"
-                        startIcon={<FileDownloadIcon />}
-                        sx={{ bgcolor: "#10b981" }}
-                        disabled={loading}
-                      >
-                        {loading ? "Preparing..." : "Download Letter"}
-                      </Button>
-                    )}
-                  </PDFDownloadLink>
-                )}
-              </Box>
             </Box>
+
+            {(tabValue === 0 || tabValue === 1) && (
+              <Box
+                sx={{
+                  px: 2.5,
+                  py: 1,
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  bgcolor: "rgba(255,255,255,0.02)",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                    TEMPLATE
+                  </Typography>
+                  <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <Select
+                      value={templateId}
+                      onChange={(e) => setTemplateId(e.target.value as TemplateId)}
+                      sx={{
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        bgcolor: "rgba(255,255,255,0.05)",
+                        "& .MuiSelect-select": {
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                          py: 0.5,
+                        },
+                      }}
+                    >
+                      {Object.values(TEMPLATES).map((tmpl) => (
+                        <MenuItem
+                          key={tmpl.id}
+                          value={tmpl.id}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                            fontSize: "0.85rem",
+                            fontWeight: 500,
+                          }}
+                        >
+                          <tmpl.icon sx={{ fontSize: "1.2rem", color: "text.secondary" }} />
+                          {tmpl.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+
+                <Box>
+                  {tabValue === 0 && (
+                    <PDFDownloadLink
+                      document={<CVComponent data={localCvData} />}
+                      fileName="cv.pdf"
+                      style={{ textDecoration: "none" }}
+                    >
+                      {({ loading }: { loading: boolean }) => (
+                        <Button
+                          component="span"
+                          variant="contained"
+                          size="small"
+                          startIcon={<FileDownloadIcon />}
+                          sx={{ bgcolor: "#10b981", "&:hover": { bgcolor: "#059669" }, px: 2 }}
+                          disabled={loading}
+                        >
+                          {loading ? "Preparing..." : "Download CV"}
+                        </Button>
+                      )}
+                    </PDFDownloadLink>
+                  )}
+                  {tabValue === 1 && (
+                    <PDFDownloadLink
+                      document={
+                        <CoverLetterComponent
+                          content={localCvData.coverLetter}
+                          data={localCvData}
+                        />
+                      }
+                      fileName="cover-letter.pdf"
+                      style={{ textDecoration: "none" }}
+                    >
+                      {({ loading }: { loading: boolean }) => (
+                        <Button
+                          component="span"
+                          variant="contained"
+                          size="small"
+                          startIcon={<FileDownloadIcon />}
+                          sx={{ bgcolor: "#10b981", "&:hover": { bgcolor: "#059669" }, px: 2 }}
+                          disabled={loading}
+                        >
+                          {loading ? "Preparing..." : "Download Letter"}
+                        </Button>
+                      )}
+                    </PDFDownloadLink>
+                  )}
+                </Box>
+              </Box>
+            )}
 
             <Box
               sx={{
-                p: 4,
-                bgcolor: tabValue === 2 || tabValue === 3 ? "transparent" : "#1e1e24",
+                flexGrow: 1,
+                bgcolor: tabValue === 2 ? "transparent" : "#1e1e24",
                 display: "flex",
                 justifyContent: "center",
-                minHeight: "800px",
+                overflow: "auto",
               }}
             >
               {tabValue === 0 ? (
-                <PDFViewer
-                  width="100%"
-                  height="800px"
-                  style={{ border: "none", borderRadius: "8px" }}
-                >
+                <PDFViewer width="100%" height="100%" style={{ border: "none", borderRadius: 0 }}>
                   <CVComponent data={localCvData} />
                 </PDFViewer>
               ) : tabValue === 1 ? (
-                <PDFViewer
-                  width="100%"
-                  height="800px"
-                  style={{ border: "none", borderRadius: "8px" }}
-                >
+                <PDFViewer width="100%" height="100%" style={{ border: "none", borderRadius: 0 }}>
                   <CoverLetterComponent content={localCvData.coverLetter} data={localCvData} />
                 </PDFViewer>
-              ) : tabValue === 2 ? (
-                <Box sx={{ width: "100%", maxWidth: "1000px", color: "text.primary" }}>
-                  <Typography variant="h5" sx={{ mb: 4, fontWeight: 600 }}>
-                    Select a Template
-                  </Typography>
-                  <Grid container spacing={3}>
-                    {Object.values(TEMPLATES).map((tmpl) => (
-                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={tmpl.id}>
-                        <Card
-                          onClick={() => setTemplateId(tmpl.id as TemplateId)}
-                          sx={{
-                            p: 4,
-                            cursor: "pointer",
-                            textAlign: "center",
-                            bgcolor:
-                              templateId === tmpl.id ? "rgba(16,185,129,0.1)" : "background.paper",
-                            border: "2px solid",
-                            borderColor: templateId === tmpl.id ? "#10b981" : "transparent",
-                            transition: "all 0.2s ease-in-out",
-                            "&:hover": {
-                              borderColor:
-                                templateId === tmpl.id ? "#10b981" : "rgba(255,255,255,0.1)",
-                              transform: "translateY(-4px)",
-                            },
-                          }}
-                        >
-                          <tmpl.icon
-                            sx={{
-                              fontSize: 48,
-                              color: templateId === tmpl.id ? "#10b981" : "text.secondary",
-                              mb: 2,
-                            }}
-                          />
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {tmpl.name}
-                          </Typography>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
               ) : (
                 <JobDetailsTab
                   job={job}

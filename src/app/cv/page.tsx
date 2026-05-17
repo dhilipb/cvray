@@ -1,38 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Container,
-  Paper,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Typography,
-  Divider,
-} from "@mui/material";
+import { Container, Button, Box } from "@mui/material";
 import { CVData } from "@/lib/types";
-import { PersonalInfoStep } from "./_components/wizard/PersonalInfoStep";
-import { SummaryStep } from "./_components/wizard/SummaryStep";
-import { SkillsStep } from "./_components/wizard/SkillsStep";
-import { ExperienceStep } from "./_components/wizard/ExperienceStep";
-import { EducationStep } from "./_components/wizard/EducationStep";
-import { CertificationsStep } from "./_components/wizard/CertificationsStep";
-import { CoverLetterStep } from "./_components/wizard/CoverLetterStep";
-import { OtherInfoStep } from "./_components/wizard/OtherInfoStep";
-
-const STEPS = [
-  "Personal Info",
-  "Summary",
-  "Skills",
-  "Experience",
-  "Education",
-  "Certifications",
-  "Cover Letter",
-  "Other Details",
-  "Preview",
-];
+import CVWizard from "@/components/cv/CVWizard";
 
 const SAMPLE_DATA: CVData = {
   name: "Sakthi Buddha",
@@ -150,7 +121,6 @@ const INITIAL_DATA: CVData = {
 };
 
 export default function CVWizardPage() {
-  const [activeStep, setActiveStep] = useState(0);
   const [cvData, setCvData] = useState<CVData>(INITIAL_DATA);
 
   useEffect(() => {
@@ -158,7 +128,6 @@ export default function CVWizardPage() {
     if (storedData) {
       try {
         const parsed = JSON.parse(storedData);
-        // Ensure that the structure is fully populated with defaults for any missing nested arrays to prevent errors
         const mergedData = {
           ...INITIAL_DATA,
           ...parsed,
@@ -177,135 +146,18 @@ export default function CVWizardPage() {
     }
   }, []);
 
-  const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
-  };
-
-  const updateData = (data: Partial<CVData>) => {
-    setCvData((prev) => ({ ...prev, ...data }));
-  };
-
   const loadSampleData = () => {
     setCvData(SAMPLE_DATA);
   };
 
-  const renderStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return <PersonalInfoStep data={cvData} updateData={updateData} />;
-      case 1:
-        return <SummaryStep data={cvData} updateData={updateData} />;
-      case 2:
-        return <SkillsStep data={cvData} updateData={updateData} />;
-      case 3:
-        return <ExperienceStep data={cvData} updateData={updateData} />;
-      case 4:
-        return <EducationStep data={cvData} updateData={updateData} />;
-      case 5:
-        return <CertificationsStep data={cvData} updateData={updateData} />;
-      case 6:
-        return <CoverLetterStep data={cvData} updateData={updateData} />;
-      case 7:
-        return <OtherInfoStep data={cvData} updateData={updateData} />;
-      case 8:
-        return (
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              Preview JSON
-            </Typography>
-            <Paper
-              sx={{
-                p: 2,
-                bgcolor: "background.default",
-                overflow: "auto",
-                maxHeight: "400px",
-                border: "1px solid rgba(255,255,255,0.05)",
-              }}
-            >
-              <pre style={{ margin: 0, fontSize: "0.8rem", color: "#10b981" }}>
-                {JSON.stringify(cvData, null, 2)}
-              </pre>
-            </Paper>
-          </Box>
-        );
-      default:
-        return <Typography>Unknown Step</Typography>;
-    }
-  };
-
   return (
     <Container maxWidth="md" sx={{ py: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
-          CV Wizard
-        </Typography>
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
         <Button variant="outlined" size="small" onClick={loadSampleData}>
           Load Sample Data
         </Button>
       </Box>
-
-      <Paper sx={{ p: { xs: 1.5, md: 3 }, mt: 1.5 }} elevation={3}>
-        <Stepper
-          activeStep={activeStep}
-          alternativeLabel
-          sx={{
-            mb: 2.5,
-            display: { xs: "none", md: "flex" },
-            "& .MuiStepLabel-label": { fontSize: "0.75rem" },
-          }}
-        >
-          {STEPS.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-
-        <Box sx={{ display: { xs: "block", md: "none" }, mb: 2, textAlign: "center" }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            Step {activeStep + 1} of {STEPS.length}: {STEPS[activeStep]}
-          </Typography>
-        </Box>
-
-        <Divider sx={{ mb: 2.5 }} />
-
-        <Box sx={{ minHeight: "300px" }}>{renderStepContent(activeStep)}</Box>
-
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined" size="small">
-            Back
-          </Button>
-          <Box>
-            {activeStep === STEPS.length - 1 ? (
-              <Button
-                variant="contained"
-                color="success"
-                size="small"
-                onClick={() => {
-                  const blob = new Blob([JSON.stringify(cvData, null, 2)], {
-                    type: "application/json",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement("a");
-                  link.href = url;
-                  link.download = "cv-data.json";
-                  link.click();
-                }}
-              >
-                Download JSON
-              </Button>
-            ) : (
-              <Button variant="contained" color="primary" size="small" onClick={handleNext}>
-                Next
-              </Button>
-            )}
-          </Box>
-        </Box>
-      </Paper>
+      <CVWizard initialData={cvData} />
     </Container>
   );
 }

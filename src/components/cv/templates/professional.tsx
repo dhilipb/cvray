@@ -1,6 +1,13 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Link } from "@react-pdf/renderer";
 import { CVData } from "@/lib/types";
+import {
+  renderBulletHtml,
+  formatDisplayUrl,
+  formatLinkUrl,
+  SECTION_LABELS,
+  DEFAULT_COVER_LETTER,
+} from "./constants";
 
 const styles = StyleSheet.create({
   page: {
@@ -19,6 +26,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginBottom: 4,
     textTransform: "uppercase",
+  },
+  title: {
+    fontFamily: "Times-Italic",
+    fontSize: 12,
+    color: "#555555",
+    marginBottom: 6,
   },
   contactRow: {
     flexDirection: "row",
@@ -45,8 +58,8 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     borderBottomWidth: 1,
     borderBottomColor: "#000000",
-    marginBottom: 8,
-    marginTop: 16,
+    marginBottom: 10,
+    marginTop: 18,
     paddingBottom: 2,
   },
   summaryText: {
@@ -58,18 +71,18 @@ const styles = StyleSheet.create({
   },
   skillRow: {
     flexDirection: "row",
-    marginBottom: 2,
+    marginBottom: 3,
     alignItems: "flex-start",
   },
   skillName: {
     fontFamily: "Times-Bold",
-    width: "20%",
+    width: "22%",
   },
   skillItems: {
-    width: "80%",
+    width: "78%",
   },
   expBlock: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
   expHeaderRow: {
     flexDirection: "row",
@@ -87,8 +100,24 @@ const styles = StyleSheet.create({
   },
   expCompany: {
     fontFamily: "Times-Italic",
-    fontSize: 11,
+    fontSize: 10.5,
+    marginBottom: 2,
+  },
+  expClient: {
+    fontFamily: "Times-Italic",
+    fontSize: 10,
+    color: "#666666",
     marginBottom: 4,
+  },
+  sectionHeader: {
+    fontFamily: "Times-Bold",
+    fontSize: 11,
+    color: "#333333",
+    marginTop: 10,
+    marginBottom: 6,
+    paddingLeft: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: "#000000",
   },
   bulletRow: {
     flexDirection: "row",
@@ -109,8 +138,12 @@ const styles = StyleSheet.create({
   eduBlock: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 6,
+    marginBottom: 8,
     alignItems: "flex-start",
+  },
+  eduLeft: {
+    flex: 1,
+    paddingRight: 8,
   },
   eduDegree: {
     fontFamily: "Times-Bold",
@@ -118,25 +151,35 @@ const styles = StyleSheet.create({
   eduInst: {
     fontFamily: "Times-Italic",
   },
+  eduDetails: {
+    fontSize: 10,
+    color: "#555555",
+    marginTop: 2,
+  },
+  eduRight: {
+    textAlign: "right",
+  },
+  certRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  otherSection: {
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  otherText: {
+    textAlign: "justify",
+    lineHeight: 1.4,
+  },
 });
 
-const renderBulletHtml = (text: string) => {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <Text key={index} style={styles.boldText}>
-          {part.substring(2, part.length - 2)}
-        </Text>
-      );
-    }
-    return <Text key={index}>{part}</Text>;
-  });
-};
+/* --------- Document Header --------- */
 
 const DocumentHeader = ({ data }: { data: CVData }) => (
   <View style={styles.header}>
     <Text style={styles.name}>{data.name}</Text>
+    {data.title && <Text style={styles.title}>{data.title}</Text>}
     <View style={styles.contactRow}>
       {data.location && <Text style={styles.contactItem}>{data.location}</Text>}
       {data.location && (data.phone || data.email) && <Text style={styles.separator}>|</Text>}
@@ -145,16 +188,64 @@ const DocumentHeader = ({ data }: { data: CVData }) => (
       {data.email && <Text style={styles.contactItem}>{data.email}</Text>}
       {data.email && data.linkedin && <Text style={styles.separator}>|</Text>}
       {data.linkedin && (
-        <Link
-          style={[styles.link, styles.contactItem]}
-          src={data.linkedin.startsWith("http") ? data.linkedin : `https://${data.linkedin}`}
-        >
-          {data.linkedin.replace(/^https?:\/\//, "")}
+        <Link style={[styles.link, styles.contactItem]} src={formatLinkUrl(data.linkedin)}>
+          {formatDisplayUrl(data.linkedin)}
         </Link>
       )}
     </View>
   </View>
 );
+
+/* --------- Experience Renderer --------- */
+
+const ExperienceSection = ({ data }: { data: CVData }) => {
+  if (!data.experience || data.experience.length === 0) return null;
+
+  let currentHeader: string | null = null;
+
+  return (
+    <View>
+      <Text style={styles.sectionTitle}>{SECTION_LABELS.PROFESSIONAL_EXPERIENCE}</Text>
+      {data.experience.map((exp, idx) => {
+        const showHeader = exp.sectionHeader && exp.sectionHeader !== currentHeader;
+        if (showHeader) currentHeader = exp.sectionHeader!;
+
+        return (
+          <View key={idx}>
+            {showHeader && <Text style={styles.sectionHeader}>{exp.sectionHeader}</Text>}
+            <View style={styles.expBlock} break={idx === 0 ? false : exp.break}>
+              <View wrap={false}>
+                <View style={styles.expHeaderRow}>
+                  <Text style={styles.expRole}>{exp.role}</Text>
+                  <Text style={styles.expDates}>{exp.dates}</Text>
+                </View>
+                <Text style={styles.expCompany}>{exp.company}</Text>
+                {exp.client && <Text style={styles.expClient}>Client: {exp.client}</Text>}
+                {exp.bulletPoints && exp.bulletPoints.length > 0 && (
+                  <View style={styles.bulletRow}>
+                    <Text style={styles.bulletPoint}>•</Text>
+                    <Text style={styles.bulletText}>
+                      {renderBulletHtml(exp.bulletPoints[0], styles.boldText)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              {exp.bulletPoints &&
+                exp.bulletPoints.slice(1).map((bp, bidx) => (
+                  <View key={bidx + 1} style={styles.bulletRow}>
+                    <Text style={styles.bulletPoint}>•</Text>
+                    <Text style={styles.bulletText}>{renderBulletHtml(bp, styles.boldText)}</Text>
+                  </View>
+                ))}
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
+/* --------- Professional CV --------- */
 
 export const ProfessionalCV = ({ data }: { data: CVData }) => (
   <Document title="cv">
@@ -163,44 +254,16 @@ export const ProfessionalCV = ({ data }: { data: CVData }) => (
 
       {data.summary && (
         <View>
-          <Text style={styles.sectionTitle}>Summary</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.SUMMARY}</Text>
           <Text style={styles.summaryText}>{data.summary}</Text>
         </View>
       )}
 
-      {data.experience && data.experience.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>Professional Experience</Text>
-          {data.experience.map((exp, idx) => (
-            <View key={idx} style={styles.expBlock} break={exp.break}>
-              <View wrap={false}>
-                <View style={styles.expHeaderRow}>
-                  <Text style={styles.expRole}>{exp.role}</Text>
-                  <Text style={styles.expDates}>{exp.dates}</Text>
-                </View>
-                <Text style={styles.expCompany}>{exp.company}</Text>
-                {exp.bulletPoints && exp.bulletPoints.length > 0 && (
-                  <View style={styles.bulletRow}>
-                    <Text style={styles.bulletPoint}>•</Text>
-                    <Text style={styles.bulletText}>{renderBulletHtml(exp.bulletPoints[0])}</Text>
-                  </View>
-                )}
-              </View>
-              {exp.bulletPoints &&
-                exp.bulletPoints.slice(1).map((bp, bidx) => (
-                  <View key={bidx + 1} style={styles.bulletRow}>
-                    <Text style={styles.bulletPoint}>•</Text>
-                    <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
-                  </View>
-                ))}
-            </View>
-          ))}
-        </View>
-      )}
+      <ExperienceSection data={data} />
 
       {data.skills && data.skills.length > 0 && (
         <View>
-          <Text style={styles.sectionTitle}>Core Competencies</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.CORE_COMPETENCIES}</Text>
           <View style={styles.skillsContainer}>
             {data.skills.map((skill, idx) => (
               <View key={idx} style={styles.skillRow}>
@@ -214,31 +277,52 @@ export const ProfessionalCV = ({ data }: { data: CVData }) => (
 
       {data.education && data.education.length > 0 && (
         <View>
-          <Text style={styles.sectionTitle}>Education</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.EDUCATION}</Text>
           {data.education.map((edu, idx) => (
             <View key={idx} style={styles.eduBlock} wrap={false}>
-              <View>
+              <View style={styles.eduLeft}>
                 <Text style={styles.eduDegree}>{edu.degree}</Text>
                 <Text style={styles.eduInst}>{edu.institution}</Text>
+                {edu.details && <Text style={styles.eduDetails}>{edu.details}</Text>}
               </View>
-              <Text>{edu.location}</Text>
+              <View style={styles.eduRight}>
+                <Text>{edu.location}</Text>
+              </View>
             </View>
           ))}
+        </View>
+      )}
+
+      {data.certifications && data.certifications.length > 0 && (
+        <View>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.CERTIFICATIONS}</Text>
+          {data.certifications.map((cert, idx) => (
+            <View key={idx} style={styles.certRow} wrap={false}>
+              <Text style={styles.boldText}>{cert.name}</Text>
+              <Text>{cert.date}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {data.other && (
+        <View style={styles.otherSection} wrap={false}>
+          <Text style={styles.sectionTitle}>{data.other.label}</Text>
+          <Text style={styles.otherText}>{data.other.value}</Text>
         </View>
       )}
     </Page>
   </Document>
 );
 
+/* --------- Professional Cover Letter --------- */
+
 export const ProfessionalCoverLetter = ({ content, data }: { content?: string; data: CVData }) => (
   <Document title="cover-letter">
     <Page size="A4" style={styles.page}>
       <DocumentHeader data={data} />
       <View style={{ marginTop: 24 }}>
-        <Text style={{ lineHeight: 1.5 }}>
-          {content ||
-            `Dear Hiring Manager,\n\nI am writing to express my interest in the position at your company. With my background in software engineering, I am confident that I would be a valuable asset to your team.\n\nBest regards,\n${data.name}`}
-        </Text>
+        <Text style={{ lineHeight: 1.5 }}>{content || DEFAULT_COVER_LETTER(data.name)}</Text>
       </View>
     </Page>
   </Document>

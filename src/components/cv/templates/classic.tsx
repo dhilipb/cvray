@@ -1,6 +1,13 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Link } from "@react-pdf/renderer";
 import { CVData } from "@/lib/types";
+import {
+  renderBulletHtml,
+  formatDisplayUrl,
+  formatLinkUrl,
+  SECTION_LABELS,
+  DEFAULT_COVER_LETTER,
+} from "./constants";
 
 const styles = StyleSheet.create({
   page: {
@@ -173,19 +180,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const renderBulletHtml = (text: string) => {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <Text key={index} style={styles.boldText}>
-          {part.substring(2, part.length - 2)}
-        </Text>
-      );
-    }
-    return <Text key={index}>{part}</Text>;
-  });
-};
+/* --------- Document Header --------- */
 
 const DocumentHeader = ({ data }: { data: CVData }) => (
   <View style={styles.header}>
@@ -199,17 +194,16 @@ const DocumentHeader = ({ data }: { data: CVData }) => (
       {data.location && <Text style={styles.contactItem}>{data.location}</Text>}
       {data.location && data.linkedin && <Text style={styles.contactSeparator}>•</Text>}
       {data.linkedin && (
-        <Link
-          style={styles.link}
-          src={data.linkedin.startsWith("http") ? data.linkedin : `https://${data.linkedin}`}
-        >
-          {data.linkedin.replace(/^https?:\/\//, "")}
+        <Link style={styles.link} src={formatLinkUrl(data.linkedin)}>
+          {formatDisplayUrl(data.linkedin)}
         </Link>
       )}
     </View>
     <View style={styles.divider} />
   </View>
 );
+
+/* --------- Classic CV --------- */
 
 export const ClassicCV = ({ data }: { data: CVData }) => (
   <Document title="cv">
@@ -222,7 +216,7 @@ export const ClassicCV = ({ data }: { data: CVData }) => (
       )}
       {data.skills && data.skills.length > 0 && (
         <View>
-          <Text style={styles.sectionTitle}>CORE COMPETENCIES</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.CORE_COMPETENCIES}</Text>
           <View style={styles.skillsContainer}>
             {data.skills.map((skill, idx) => (
               <View
@@ -241,9 +235,9 @@ export const ClassicCV = ({ data }: { data: CVData }) => (
       )}
       {data.experience && data.experience.length > 0 && (
         <View>
-          <Text style={styles.sectionTitle}>PROFESSIONAL EXPERIENCE</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.PROFESSIONAL_EXPERIENCE}</Text>
           {data.experience.map((exp, idx) => (
-            <View key={idx} style={styles.expBlock} break={exp.break}>
+            <View key={idx} style={styles.expBlock} break={idx === 0 ? false : exp.break}>
               {exp.bulletPoints && exp.bulletPoints.length > 0 ? (
                 <>
                   <View wrap={false}>
@@ -254,13 +248,15 @@ export const ClassicCV = ({ data }: { data: CVData }) => (
                     <Text style={styles.expCompany}>{exp.company}</Text>
                     <View style={styles.bulletRow}>
                       <Text style={styles.bulletPoint}>›</Text>
-                      <Text style={styles.bulletText}>{renderBulletHtml(exp.bulletPoints[0])}</Text>
+                      <Text style={styles.bulletText}>
+                        {renderBulletHtml(exp.bulletPoints[0], styles.boldText)}
+                      </Text>
                     </View>
                   </View>
                   {exp.bulletPoints.slice(1).map((bp, bidx) => (
                     <View key={bidx + 1} style={styles.bulletRow}>
                       <Text style={styles.bulletPoint}>›</Text>
-                      <Text style={styles.bulletText}>{renderBulletHtml(bp)}</Text>
+                      <Text style={styles.bulletText}>{renderBulletHtml(bp, styles.boldText)}</Text>
                     </View>
                   ))}
                 </>
@@ -279,7 +275,7 @@ export const ClassicCV = ({ data }: { data: CVData }) => (
       )}
       {data.education && data.education.length > 0 && (
         <View>
-          <Text style={styles.sectionTitle}>EDUCATION</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.EDUCATION}</Text>
           {data.education.map((edu, idx) => (
             <View key={idx} style={styles.eduBlock} wrap={false}>
               <Text style={styles.eduDegree}>{edu.degree}</Text>
@@ -294,7 +290,7 @@ export const ClassicCV = ({ data }: { data: CVData }) => (
       )}
       {data.certifications && data.certifications.length > 0 && (
         <View>
-          <Text style={styles.sectionTitle}>CERTIFICATIONS</Text>
+          <Text style={styles.sectionTitle}>{SECTION_LABELS.CERTIFICATIONS}</Text>
           {data.certifications.map((cert, idx) => (
             <View key={idx} style={styles.certRow} wrap={false}>
               <Text style={styles.bulletPoint}>›</Text>
@@ -316,14 +312,15 @@ export const ClassicCV = ({ data }: { data: CVData }) => (
   </Document>
 );
 
+/* --------- Classic Cover Letter --------- */
+
 export const ClassicCoverLetter = ({ content, data }: { content?: string; data: CVData }) => (
   <Document title="cover-letter">
     <Page size="A4" style={styles.page}>
       <DocumentHeader data={data} />
       <View style={{ marginTop: 24 }}>
         <Text style={{ fontSize: 11, lineHeight: 1.8, color: "#333333" }}>
-          {content ||
-            `Dear Hiring Manager,\n\nI am writing to express my interest in the position at your company. With my background in software engineering, I am confident that I would be a valuable asset to your team.\n\nBest regards,\n${data.name}`}
+          {content || DEFAULT_COVER_LETTER(data.name)}
         </Text>
       </View>
     </Page>

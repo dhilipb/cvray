@@ -20,12 +20,15 @@
 ## Features
 
 - **Landing Page:** A visually stunning entry point with the CVRay logo and "Sign in with Google" functionality.
-- **Profiles First:** Users start by managing foundational base profiles (`/profiles`) displayed as clickable cards.
-- **Job Tracking:** Nested routing (`/profiles/[profileId]/jobs`) allows tracking applications tailored to a specific base profile. Clicking a job card opens the dedicated CV Tailoring page.
+- **Profiles First:** Users start by managing foundational base profiles (`/profiles`). Includes an advanced **Create Profile** modal flow allowing instant upload and multi-modal AI parsing.
+- **Modular & High-Fidelity Profile Cards:** Upgraded, responsive card widgets featuring linear-gradient accent headers, glassmorphic layout backing, a custom neon radial-gradient initials avatar, a preview row of key skills, and an exceptionally premium, dynamic hover state.
+- **Job Tracking:** Nested routing (`/profiles/[profileId]/jobs`) tracks all applications tailored to a specific base profile, featuring status tracking, real-time filtering, sorting, and search. Includes a direct **Edit Profile** shortcut button for instant profile modifications.
 - **CV Tailoring Page:** A comprehensive workspace (`/profiles/[profileId]/jobs/[jobId]/cv`) featuring job details, an AI tailoring assistant, and live previews of the CV and cover letter.
 - **AI CV Assistant:** An interactive chatbot powered by Gemini Flash that can automatically modify CV data and cover letters using specialized tools (`updateCV`, `updateCoverLetter`).
 - **Dynamic Previews:** Side-by-side view of the CV and Cover Letter with instant updates as the AI modifies them.
-- **Dynamic PDF Generation:** Built-in CV viewing and PDF generation using `@react-pdf/renderer`.
+- **Dynamic PDF Generation:** Built-in CV viewing and PDF generation using `@react-pdf/renderer` across 5 highly customized styles (Classic, Modern, Minimalist, Professional, Creative).
+- **Centralized PDF Utilities:** Shareable, lint-safe parser functions, clean URL formatters, and central text renderers imported from `src/components/cv/templates/constants.tsx`.
+- **Layout Integrity Safeguard:** Automatic prevention of fragmented/broken experience lists on the very first work experience block to ensure visual excellence and design coherence.
 
 ## Tech Implementation Details
 

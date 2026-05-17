@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Box, Typography, TextField, IconButton, Card, CircularProgress } from "@mui/material";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SendIcon from "@mui/icons-material/Send";
@@ -8,6 +8,7 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { CVData } from "@/lib/types";
+import ReactMarkdown from "react-markdown";
 
 /* --------- Types --------- */
 
@@ -31,6 +32,7 @@ export const AIChatAssistant = ({
   onCoverLetterUpdate,
 }: AIChatAssistantProps) => {
   const [chatInput, setChatInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const transport = useMemo(
     () =>
@@ -71,6 +73,10 @@ export const AIChatAssistant = ({
       },
     ] as UIMessage[],
   });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
 
   const handleChatSubmit = (e?: React.SyntheticEvent) => {
     e?.preventDefault();
@@ -140,8 +146,13 @@ export const AIChatAssistant = ({
           >
             {msg.parts.map((part, i) =>
               part.type === "text" ? (
-                <Typography key={i} variant="body2">
-                  {part.text}
+                <Typography
+                  component="div"
+                  key={i}
+                  variant="body2"
+                  sx={{ "& p": { m: 0, mb: 1, "&:last-child": { mb: 0 } } }}
+                >
+                  <ReactMarkdown>{part.text}</ReactMarkdown>
                 </Typography>
               ) : null,
             )}
@@ -152,6 +163,7 @@ export const AIChatAssistant = ({
             <CircularProgress size={20} sx={{ color: "#10b981" }} />
           </Box>
         )}
+        <div ref={messagesEndRef} />
       </Box>
 
       <Box sx={{ p: 2, borderTop: "1px solid rgba(255,255,255,0.05)" }}>

@@ -62,9 +62,17 @@ Open [http://localhost:3344](http://localhost:3344) with your browser to see the
 - **Google Authentication:** Secure sign-in using Google OAuth.
 - **Profiles-First Architecture:** Focused on managing multiple professional profiles.
 - **AI CV Tailoring:** Upload base CV and let Gemini AI parse and structure your data automatically for specific roles.
-- **Job Tracking & Management:** Keep track of applications with status updates, search, filtering, and sorting capabilities.
-- **Premium UI:** "Obsidian & Neon" aesthetic with glassmorphism, responsive layouts, and smooth micro-animations.
+- **Modular & High-Fidelity Profile Cards:** Base Profiles are organized in stunning glassmorphic cards presenting dynamic radial-gradient initials avatars, top glowing gradient accents, a premium modern hover state, and interactive top-skill badge previewers.
+- **Job Tracking & Management:** Keep track of applications for each profile with status updates, search, filtering, and sorting capabilities. Includes an immediate **Edit Profile** button on the dashboard for seamless adjustments.
+- **Premium UI:** "Obsidian & Neon" aesthetic with glassmorphic cards, responsive layouts, and smooth micro-animations.
 - **PDF Preview & Export:** View and download high-quality PDFs of your tailored CVs.
+- **Modular Template System:** Dynamic switching between 5 beautifully stylized PDF templates:
+  - **Classic:** Elegant classic styling with bold accents and neat section partitions.
+  - **Modern:** Minimal emerald-accented modern design.
+  - **Minimalist:** Ultra-clean black-and-white style with lightweight margins.
+  - **Professional:** Structured academic/executive format using Times-Roman.
+  - **Creative:** Sidebar-based dynamic emerald/obsidian modern layout.
+- **Smart Layout Page-Break Safeguards:** Automatic prevention of fragmented/broken experience lists on the very first work experience block to guarantee professional rendering on print/PDF generation.
 
 ## Project Structure
 
@@ -73,4 +81,5 @@ Open [http://localhost:3344](http://localhost:3344) with your browser to see the
 - `src/app/api/auth`: NextAuth authentication routes.
 - `src/lib`: Core utilities (Prisma client, Auth config).
 - `src/components`: Reusable UI components.
+- `src/components/cv/templates`: Centralized PDF templates directory containing the 5 designs and `constants.tsx` for shared renderers, URL formatting utilities, and section label definitions.
 - `prisma`: Database schema and migrations.
