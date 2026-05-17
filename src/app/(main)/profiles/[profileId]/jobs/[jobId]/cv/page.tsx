@@ -35,6 +35,9 @@ import {
   ProfessionalCoverLetter,
   CreativeCV,
   CreativeCoverLetter,
+  COLOR_THEMES,
+  DEFAULT_THEME,
+  type ThemeId,
 } from "@/components/cv/templates";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
@@ -234,6 +237,7 @@ export default function JobCVPage({
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [templateId, setTemplateId] = useState<TemplateId>("classic");
+  const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME);
 
   const [localCvData, setLocalCvData] = useState<CVData | null>(null);
 
@@ -441,12 +445,41 @@ export default function JobCVPage({
                       ))}
                     </Select>
                   </FormControl>
+
+                  <>
+                    <Box sx={{ width: 1, height: 20, bgcolor: "divider", mx: 1 }} />
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700 }}>
+                      COLOR
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                      {Object.entries(COLOR_THEMES).map(([id, palette]) => (
+                        <Box
+                          key={id}
+                          onClick={() => setThemeId(id as ThemeId)}
+                          sx={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: "50%",
+                            bgcolor: palette.primary,
+                            cursor: "pointer",
+                            border: themeId === id ? "2px solid white" : "2px solid transparent",
+                            boxShadow: themeId === id ? `0 0 0 2px ${palette.primary}` : "none",
+                            transition: "all 0.15s",
+                            "&:hover": {
+                              transform: "scale(1.15)",
+                            },
+                          }}
+                          title={id.charAt(0).toUpperCase() + id.slice(1)}
+                        />
+                      ))}
+                    </Box>
+                  </>
                 </Box>
 
                 <Box>
                   {tabValue === 0 && (
                     <PDFDownloadLink
-                      document={<CVComponent data={localCvData} />}
+                      document={<CVComponent data={localCvData} colors={COLOR_THEMES[themeId]} />}
                       fileName="cv.pdf"
                       style={{ textDecoration: "none" }}
                     >
@@ -470,6 +503,7 @@ export default function JobCVPage({
                         <CoverLetterComponent
                           content={localCvData.coverLetter}
                           data={localCvData}
+                          colors={COLOR_THEMES[themeId]}
                         />
                       }
                       fileName="cover-letter.pdf"
@@ -504,11 +538,15 @@ export default function JobCVPage({
             >
               {tabValue === 0 ? (
                 <PDFViewer width="100%" height="100%" style={{ border: "none", borderRadius: 0 }}>
-                  <CVComponent data={localCvData} />
+                  <CVComponent data={localCvData} colors={COLOR_THEMES[themeId]} />
                 </PDFViewer>
               ) : tabValue === 1 ? (
                 <PDFViewer width="100%" height="100%" style={{ border: "none", borderRadius: 0 }}>
-                  <CoverLetterComponent content={localCvData.coverLetter} data={localCvData} />
+                  <CoverLetterComponent
+                    content={localCvData.coverLetter}
+                    data={localCvData}
+                    colors={COLOR_THEMES[themeId]}
+                  />
                 </PDFViewer>
               ) : (
                 <JobDetailsTab

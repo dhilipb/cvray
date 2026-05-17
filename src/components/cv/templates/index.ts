@@ -28,3 +28,4 @@ export * from "./modern";
 export * from "./minimalist";
 export * from "./professional";
 export * from "./creative";
+export { COLOR_THEMES, DEFAULT_THEME, type ColorPalette, type ThemeId } from "./themes";

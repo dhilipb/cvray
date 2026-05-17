@@ -8,8 +8,9 @@ import {
   SECTION_LABELS,
   DEFAULT_COVER_LETTER,
 } from "./constants";
+import { ColorPalette, COLOR_THEMES, DEFAULT_THEME } from "./themes";
 
-const styles = StyleSheet.create({
+const baseStyles = StyleSheet.create({
   page: {
     padding: 40,
     fontFamily: "Inter",
@@ -30,7 +31,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 12,
-    color: "#2f5597",
     fontWeight: 700,
     textTransform: "uppercase",
     letterSpacing: 1,
@@ -57,13 +57,11 @@ const styles = StyleSheet.create({
   },
   divider: {
     borderBottomWidth: 1.5,
-    borderBottomColor: "#2f5597",
     width: "100%",
   },
   sectionTitle: {
     fontSize: 11,
     fontWeight: 700,
-    color: "#2f5597",
     textTransform: "uppercase",
     letterSpacing: 1.2,
     marginBottom: 10,
@@ -71,7 +69,6 @@ const styles = StyleSheet.create({
   },
   summaryContainer: {
     borderLeftWidth: 3,
-    borderLeftColor: "#2f5597",
     paddingLeft: 10,
     marginBottom: 16,
     marginTop: 10,
@@ -97,7 +94,6 @@ const styles = StyleSheet.create({
   skillName: {
     width: "25%",
     fontWeight: 700,
-    color: "#2f5597",
     fontSize: 9,
     paddingRight: 10,
   },
@@ -136,7 +132,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   bulletPoint: {
-    color: "#2f5597",
     fontWeight: 700,
     marginRight: 6,
     fontSize: 12,
@@ -182,147 +177,171 @@ const styles = StyleSheet.create({
 
 /* --------- Document Header --------- */
 
-const DocumentHeader = ({ data }: { data: CVData }) => (
-  <View style={styles.header}>
-    <Text style={styles.name}>{data.name}</Text>
-    <Text style={styles.title}>{data.title}</Text>
-    <View style={styles.contactRow}>
-      {data.email && <Text style={styles.contactItem}>{data.email}</Text>}
-      {data.email && data.phone && <Text style={styles.contactSeparator}>•</Text>}
-      {data.phone && <Text style={styles.contactItem}>{data.phone}</Text>}
-      {data.phone && data.location && <Text style={styles.contactSeparator}>•</Text>}
-      {data.location && <Text style={styles.contactItem}>{data.location}</Text>}
-      {data.location && data.linkedin && <Text style={styles.contactSeparator}>•</Text>}
+const DocumentHeader = ({ data, colors }: { data: CVData; colors: ColorPalette }) => (
+  <View style={baseStyles.header}>
+    <Text style={baseStyles.name}>{data.name}</Text>
+    <Text style={[baseStyles.title, { color: colors.primary }]}>{data.title}</Text>
+    <View style={baseStyles.contactRow}>
+      {data.email && <Text style={baseStyles.contactItem}>{data.email}</Text>}
+      {data.email && data.phone && <Text style={baseStyles.contactSeparator}>•</Text>}
+      {data.phone && <Text style={baseStyles.contactItem}>{data.phone}</Text>}
+      {data.phone && data.location && <Text style={baseStyles.contactSeparator}>•</Text>}
+      {data.location && <Text style={baseStyles.contactItem}>{data.location}</Text>}
+      {data.location && data.linkedin && <Text style={baseStyles.contactSeparator}>•</Text>}
       {data.linkedin && (
-        <Link style={styles.link} src={formatLinkUrl(data.linkedin)}>
+        <Link style={baseStyles.link} src={formatLinkUrl(data.linkedin)}>
           {formatDisplayUrl(data.linkedin)}
         </Link>
       )}
     </View>
-    <View style={styles.divider} />
+    <View style={[baseStyles.divider, { borderBottomColor: colors.primary }]} />
   </View>
 );
 
 /* --------- Classic CV --------- */
 
-export const ClassicCV = ({ data }: { data: CVData }) => (
-  <Document title="cv">
-    <Page size="A4" style={styles.page}>
-      <DocumentHeader data={data} />
-      {data.summary && (
-        <View style={styles.summaryContainer}>
-          <Text style={styles.summaryText}>{data.summary}</Text>
-        </View>
-      )}
-      {data.skills && data.skills.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.CORE_COMPETENCIES}</Text>
-          <View style={styles.skillsContainer}>
-            {data.skills.map((skill, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.skillRow,
-                  idx === data.skills!.length - 1 ? { borderBottomWidth: 0 } : {},
-                ]}
-              >
-                <Text style={styles.skillName}>{skill.name}</Text>
-                <Text style={styles.skillItems}>{skill.items}</Text>
+export const ClassicCV = ({ data, colors }: { data: CVData; colors?: ColorPalette }) => {
+  const c = colors || COLOR_THEMES[DEFAULT_THEME];
+  return (
+    <Document title="cv">
+      <Page size="A4" style={baseStyles.page}>
+        <DocumentHeader data={data} colors={c} />
+        {data.summary && (
+          <View style={[baseStyles.summaryContainer, { borderLeftColor: c.primary }]}>
+            <Text style={baseStyles.summaryText}>{data.summary}</Text>
+          </View>
+        )}
+        {data.skills && data.skills.length > 0 && (
+          <View>
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
+              {SECTION_LABELS.CORE_COMPETENCIES}
+            </Text>
+            <View style={baseStyles.skillsContainer}>
+              {data.skills.map((skill, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    baseStyles.skillRow,
+                    idx === data.skills!.length - 1 ? { borderBottomWidth: 0 } : {},
+                  ]}
+                >
+                  <Text style={[baseStyles.skillName, { color: c.primary }]}>{skill.name}</Text>
+                  <Text style={baseStyles.skillItems}>{skill.items}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+        {data.experience && data.experience.length > 0 && (
+          <View>
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
+              {SECTION_LABELS.PROFESSIONAL_EXPERIENCE}
+            </Text>
+            {data.experience.map((exp, idx) => (
+              <View key={idx} style={baseStyles.expBlock} break={idx === 0 ? false : exp.break}>
+                {exp.bulletPoints && exp.bulletPoints.length > 0 ? (
+                  <>
+                    <View wrap={false}>
+                      <View style={baseStyles.expHeaderRow}>
+                        <Text style={baseStyles.expRole}>{exp.role}</Text>
+                        <Text style={baseStyles.expDates}>{exp.dates}</Text>
+                      </View>
+                      <Text style={baseStyles.expCompany}>{exp.company}</Text>
+                      <View style={baseStyles.bulletRow}>
+                        <Text style={[baseStyles.bulletPoint, { color: c.primary }]}>›</Text>
+                        <Text style={baseStyles.bulletText}>
+                          {renderBulletHtml(exp.bulletPoints[0], baseStyles.boldText)}
+                        </Text>
+                      </View>
+                    </View>
+                    {exp.bulletPoints.slice(1).map((bp, bidx) => (
+                      <View key={bidx + 1} style={baseStyles.bulletRow}>
+                        <Text style={[baseStyles.bulletPoint, { color: c.primary }]}>›</Text>
+                        <Text style={baseStyles.bulletText}>
+                          {renderBulletHtml(bp, baseStyles.boldText)}
+                        </Text>
+                      </View>
+                    ))}
+                  </>
+                ) : (
+                  <View wrap={false}>
+                    <View style={baseStyles.expHeaderRow}>
+                      <Text style={baseStyles.expRole}>{exp.role}</Text>
+                      <Text style={baseStyles.expDates}>{exp.dates}</Text>
+                    </View>
+                    <Text style={baseStyles.expCompany}>{exp.company}</Text>
+                  </View>
+                )}
               </View>
             ))}
           </View>
-        </View>
-      )}
-      {data.experience && data.experience.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.PROFESSIONAL_EXPERIENCE}</Text>
-          {data.experience.map((exp, idx) => (
-            <View key={idx} style={styles.expBlock} break={idx === 0 ? false : exp.break}>
-              {exp.bulletPoints && exp.bulletPoints.length > 0 ? (
-                <>
-                  <View wrap={false}>
-                    <View style={styles.expHeaderRow}>
-                      <Text style={styles.expRole}>{exp.role}</Text>
-                      <Text style={styles.expDates}>{exp.dates}</Text>
-                    </View>
-                    <Text style={styles.expCompany}>{exp.company}</Text>
-                    <View style={styles.bulletRow}>
-                      <Text style={styles.bulletPoint}>›</Text>
-                      <Text style={styles.bulletText}>
-                        {renderBulletHtml(exp.bulletPoints[0], styles.boldText)}
-                      </Text>
-                    </View>
-                  </View>
-                  {exp.bulletPoints.slice(1).map((bp, bidx) => (
-                    <View key={bidx + 1} style={styles.bulletRow}>
-                      <Text style={styles.bulletPoint}>›</Text>
-                      <Text style={styles.bulletText}>{renderBulletHtml(bp, styles.boldText)}</Text>
-                    </View>
-                  ))}
-                </>
-              ) : (
-                <View wrap={false}>
-                  <View style={styles.expHeaderRow}>
-                    <Text style={styles.expRole}>{exp.role}</Text>
-                    <Text style={styles.expDates}>{exp.dates}</Text>
-                  </View>
-                  <Text style={styles.expCompany}>{exp.company}</Text>
-                </View>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-      {data.education && data.education.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.EDUCATION}</Text>
-          {data.education.map((edu, idx) => (
-            <View key={idx} style={styles.eduBlock} wrap={false}>
-              <Text style={styles.eduDegree}>{edu.degree}</Text>
-              <Text style={styles.eduInst}>
-                {edu.institution}
-                {edu.location ? ` | ${edu.location}` : ""}
-              </Text>
-              {edu.details && <Text style={styles.eduDetails}>{edu.details}</Text>}
-            </View>
-          ))}
-        </View>
-      )}
-      {data.certifications && data.certifications.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.CERTIFICATIONS}</Text>
-          {data.certifications.map((cert, idx) => (
-            <View key={idx} style={styles.certRow} wrap={false}>
-              <Text style={styles.bulletPoint}>›</Text>
-              <Text style={styles.bulletText}>
-                <Text style={styles.certName}>{cert.name}</Text>
-                {cert.date ? ` — ${cert.date}` : ""}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-      {data.other && (
-        <View wrap={false}>
-          <Text style={styles.sectionTitle}>{data.other.label}</Text>
-          <Text style={styles.summaryText}>{data.other.value}</Text>
-        </View>
-      )}
-    </Page>
-  </Document>
-);
+        )}
+        {data.education && data.education.length > 0 && (
+          <View>
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
+              {SECTION_LABELS.EDUCATION}
+            </Text>
+            {data.education.map((edu, idx) => (
+              <View key={idx} style={baseStyles.eduBlock} wrap={false}>
+                <Text style={baseStyles.eduDegree}>{edu.degree}</Text>
+                <Text style={baseStyles.eduInst}>
+                  {edu.institution}
+                  {edu.location ? ` | ${edu.location}` : ""}
+                </Text>
+                {edu.details && <Text style={baseStyles.eduDetails}>{edu.details}</Text>}
+              </View>
+            ))}
+          </View>
+        )}
+        {data.certifications && data.certifications.length > 0 && (
+          <View>
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
+              {SECTION_LABELS.CERTIFICATIONS}
+            </Text>
+            {data.certifications.map((cert, idx) => (
+              <View key={idx} style={baseStyles.certRow} wrap={false}>
+                <Text style={[baseStyles.bulletPoint, { color: c.primary }]}>›</Text>
+                <Text style={baseStyles.bulletText}>
+                  <Text style={baseStyles.certName}>{cert.name}</Text>
+                  {cert.date ? ` — ${cert.date}` : ""}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+        {data.other && (
+          <View wrap={false}>
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{data.other.label}</Text>
+            <Text style={baseStyles.summaryText}>{data.other.value}</Text>
+          </View>
+        )}
+      </Page>
+    </Document>
+  );
+};
 
 /* --------- Classic Cover Letter --------- */
 
-export const ClassicCoverLetter = ({ content, data }: { content?: string; data: CVData }) => (
-  <Document title="cover-letter">
-    <Page size="A4" style={styles.page}>
-      <DocumentHeader data={data} />
-      <View style={{ marginTop: 24 }}>
-        <Text style={{ fontSize: 11, lineHeight: 1.8, color: "#333333" }}>
-          {content || DEFAULT_COVER_LETTER(data.name)}
-        </Text>
-      </View>
-    </Page>
-  </Document>
-);
+export const ClassicCoverLetter = ({
+  content,
+  data,
+  colors,
+}: {
+  content?: string;
+  data: CVData;
+  colors?: ColorPalette;
+}) => {
+  const c = colors || COLOR_THEMES[DEFAULT_THEME];
+  return (
+    <Document title="cover-letter">
+      <Page size="A4" style={baseStyles.page}>
+        <DocumentHeader data={data} colors={c} />
+        <View style={{ marginTop: 24 }}>
+          <Text style={{ fontSize: 11, lineHeight: 1.8, color: "#333333" }}>
+            {content || DEFAULT_COVER_LETTER(data.name)}
+          </Text>
+        </View>
+      </Page>
+    </Document>
+  );
+};

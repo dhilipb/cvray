@@ -8,234 +8,270 @@ import {
   SECTION_LABELS,
   DEFAULT_COVER_LETTER,
 } from "./constants";
+import { ColorPalette, COLOR_THEMES, DEFAULT_THEME } from "./themes";
 
-const styles = StyleSheet.create({
+// SWISS MINIMALIST THEME: Ultra-clean design with generous whitespace and perfect grid alignment
+const baseStyles = StyleSheet.create({
   page: {
-    padding: 50,
+    padding: 60,
     fontFamily: "Inter",
-    fontSize: 9.5,
-    color: "#000000",
-    lineHeight: 1.4,
+    fontSize: 9,
+    color: "#1a1a1a",
+    lineHeight: 1.5,
   },
   header: {
-    marginBottom: 24,
-    alignItems: "center",
+    marginBottom: 48,
   },
   name: {
-    fontWeight: 700,
-    fontSize: 20,
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    marginBottom: 8,
+    fontWeight: 300,
+    fontSize: 28,
+    letterSpacing: -0.5,
+    marginBottom: 6,
+    color: "#000000",
   },
   title: {
-    fontSize: 10,
+    fontSize: 11,
+    fontWeight: 400,
     color: "#666666",
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-    marginBottom: 12,
+    marginBottom: 20,
+    letterSpacing: 0.2,
   },
   contactRow: {
     flexDirection: "row",
-    justifyContent: "center",
     flexWrap: "wrap",
     fontSize: 8.5,
     color: "#666666",
+    gap: 4,
   },
   contactItem: {
-    marginRight: 10,
-    marginBottom: 4,
+    marginRight: 16,
+  },
+  contactDot: {
+    marginRight: 16,
+    color: "#cccccc",
   },
   link: {
     textDecoration: "none",
     color: "#666666",
   },
   sectionTitle: {
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: 2,
+    fontSize: 9,
+    fontWeight: 600,
+    letterSpacing: 1.5,
     textTransform: "uppercase",
-    borderBottomWidth: 1,
-    borderBottomColor: "#000000",
-    paddingBottom: 4,
-    marginBottom: 12,
-    marginTop: 20,
+    marginBottom: 16,
+    marginTop: 36,
+    color: "#000000",
   },
   summaryText: {
-    lineHeight: 1.6,
-    marginBottom: 8,
+    lineHeight: 1.7,
+    marginBottom: 12,
+    color: "#333333",
   },
   skillRow: {
     flexDirection: "row",
-    marginBottom: 4,
+    marginBottom: 10,
     alignItems: "flex-start",
   },
   skillName: {
-    width: "30%",
-    fontWeight: 600,
+    width: "28%",
+    fontWeight: 500,
+    fontSize: 8.5,
+    color: "#000000",
   },
   skillItems: {
-    width: "70%",
-    color: "#444444",
+    width: "72%",
+    color: "#555555",
+    fontSize: 8.5,
+    lineHeight: 1.6,
   },
   expBlock: {
-    marginBottom: 18,
+    marginBottom: 24,
   },
   expHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 2,
-    alignItems: "flex-start",
+    marginBottom: 4,
+    alignItems: "baseline",
   },
   expRole: {
-    fontWeight: 600,
-    fontSize: 10.5,
+    fontWeight: 500,
+    fontSize: 10,
+    color: "#000000",
     flex: 1,
   },
   expDates: {
-    color: "#666666",
-    fontSize: 8.5,
+    fontSize: 8,
+    color: "#999999",
+    fontWeight: 400,
   },
   expCompany: {
-    fontStyle: "italic",
-    color: "#444444",
-    marginBottom: 2,
+    fontSize: 9,
+    color: "#555555",
+    marginBottom: 10,
   },
   expClient: {
-    fontStyle: "italic",
-    color: "#777777",
-    fontSize: 8.5,
-    marginBottom: 6,
+    fontSize: 8,
+    color: "#999999",
+    marginBottom: 10,
   },
   sectionHeader: {
-    fontSize: 10,
-    fontWeight: 700,
-    color: "#333333",
-    marginTop: 12,
-    marginBottom: 8,
-    paddingLeft: 10,
-    borderLeftWidth: 2,
-    borderLeftColor: "#000000",
+    fontSize: 9,
+    fontWeight: 600,
+    color: "#000000",
+    marginTop: 16,
+    marginBottom: 10,
+    paddingLeft: 12,
+    borderLeftWidth: 1.5,
   },
   bulletRow: {
     flexDirection: "row",
-    marginBottom: 4,
-    paddingLeft: 8,
+    marginBottom: 6,
     alignItems: "flex-start",
   },
   bulletPoint: {
-    width: 10,
-    fontSize: 10,
+    width: 16,
+    fontSize: 8,
+    color: "#999999",
   },
   bulletText: {
     flex: 1,
+    fontSize: 9,
     color: "#333333",
+    lineHeight: 1.6,
   },
   boldText: {
-    fontWeight: 700,
+    fontWeight: 600,
+    color: "#000000",
   },
   eduBlock: {
+    marginBottom: 16,
+  },
+  eduHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
-    alignItems: "flex-start",
-  },
-  eduLeft: {
-    width: "70%",
-  },
-  eduRight: {
-    width: "30%",
-    textAlign: "right",
-    color: "#666666",
-    fontSize: 8.5,
+    marginBottom: 3,
+    alignItems: "baseline",
   },
   eduDegree: {
-    fontWeight: 600,
+    fontWeight: 500,
+    fontSize: 9.5,
+    color: "#000000",
+    flex: 1,
+  },
+  eduLocation: {
+    fontSize: 8,
+    color: "#999999",
   },
   eduInst: {
-    color: "#444444",
+    color: "#555555",
+    fontSize: 9,
+    marginBottom: 2,
   },
   eduDetails: {
-    color: "#777777",
-    fontSize: 8.5,
-    marginTop: 2,
+    color: "#999999",
+    fontSize: 8,
   },
   certRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 8,
+    alignItems: "baseline",
   },
   certName: {
-    fontWeight: 600,
+    fontWeight: 500,
+    fontSize: 9,
+    color: "#000000",
+    flex: 1,
   },
   certDate: {
-    color: "#666666",
-    fontSize: 8.5,
+    color: "#999999",
+    fontSize: 8,
   },
   otherSection: {
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 24,
   },
 });
 
 /* --------- Document Header --------- */
 
-const DocumentHeader = ({ data }: { data: CVData }) => (
-  <View style={styles.header}>
-    <Text style={styles.name}>{data.name}</Text>
-    <Text style={styles.title}>{data.title}</Text>
-    <View style={styles.contactRow}>
-      {data.email && <Text style={styles.contactItem}>{data.email}</Text>}
-      {data.phone && <Text style={styles.contactItem}>{data.phone}</Text>}
-      {data.location && <Text style={styles.contactItem}>{data.location}</Text>}
-      {data.linkedin && (
-        <Link style={[styles.link, styles.contactItem]} src={formatLinkUrl(data.linkedin)}>
-          {formatDisplayUrl(data.linkedin)}
-        </Link>
-      )}
+const DocumentHeader = ({ data, colors }: { data: CVData; colors: ColorPalette }) => {
+  const _contacts = [
+    data.email,
+    data.phone,
+    data.location,
+    data.linkedin ? formatDisplayUrl(data.linkedin) : null,
+  ].filter(Boolean);
+
+  return (
+    <View style={baseStyles.header}>
+      <Text style={baseStyles.name}>{data.name}</Text>
+      <Text style={[baseStyles.title, { color: colors.primaryText }]}>{data.title}</Text>
+      <View style={baseStyles.contactRow}>
+        {data.email && <Text style={baseStyles.contactItem}>{data.email}</Text>}
+        {data.email && data.phone && <Text style={baseStyles.contactDot}>·</Text>}
+        {data.phone && <Text style={baseStyles.contactItem}>{data.phone}</Text>}
+        {data.phone && data.location && <Text style={baseStyles.contactDot}>·</Text>}
+        {data.location && <Text style={baseStyles.contactItem}>{data.location}</Text>}
+        {data.location && data.linkedin && <Text style={baseStyles.contactDot}>·</Text>}
+        {data.linkedin && (
+          <Link
+            style={[baseStyles.link, baseStyles.contactItem, { color: colors.primary }]}
+            src={formatLinkUrl(data.linkedin)}
+          >
+            {formatDisplayUrl(data.linkedin)}
+          </Link>
+        )}
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 /* --------- Experience Renderer --------- */
 
-const ExperienceSection = ({ data }: { data: CVData }) => {
+const ExperienceSection = ({ data, colors }: { data: CVData; colors: ColorPalette }) => {
   if (!data.experience || data.experience.length === 0) return null;
 
   let currentHeader: string | null = null;
 
   return (
     <View>
-      <Text style={styles.sectionTitle}>{SECTION_LABELS.EXPERIENCE}</Text>
+      <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.EXPERIENCE}</Text>
       {data.experience.map((exp, idx) => {
         const showHeader = exp.sectionHeader && exp.sectionHeader !== currentHeader;
         if (showHeader) currentHeader = exp.sectionHeader!;
 
         return (
           <View key={idx}>
-            {showHeader && <Text style={styles.sectionHeader}>{exp.sectionHeader}</Text>}
-            <View style={styles.expBlock} break={idx === 0 ? false : exp.break}>
+            {showHeader && (
+              <Text style={[baseStyles.sectionHeader, { borderLeftColor: colors.primary }]}>
+                {exp.sectionHeader}
+              </Text>
+            )}
+            <View style={baseStyles.expBlock} break={idx === 0 ? false : exp.break}>
               <View wrap={false}>
-                <View style={styles.expHeaderRow}>
-                  <Text style={styles.expRole}>{exp.role}</Text>
-                  <Text style={styles.expDates}>{exp.dates}</Text>
+                <View style={baseStyles.expHeaderRow}>
+                  <Text style={baseStyles.expRole}>{exp.role}</Text>
+                  <Text style={baseStyles.expDates}>{exp.dates}</Text>
                 </View>
-                <Text style={styles.expCompany}>{exp.company}</Text>
-                {exp.client && <Text style={styles.expClient}>Client: {exp.client}</Text>}
+                <Text style={baseStyles.expCompany}>{exp.company}</Text>
+                {exp.client && <Text style={baseStyles.expClient}>Client: {exp.client}</Text>}
                 {exp.bulletPoints && exp.bulletPoints.length > 0 && (
-                  <View style={styles.bulletRow}>
-                    <Text style={styles.bulletPoint}>-</Text>
-                    <Text style={styles.bulletText}>
-                      {renderBulletHtml(exp.bulletPoints[0], styles.boldText)}
+                  <View style={baseStyles.bulletRow}>
+                    <Text style={baseStyles.bulletPoint}>—</Text>
+                    <Text style={baseStyles.bulletText}>
+                      {renderBulletHtml(exp.bulletPoints[0], baseStyles.boldText)}
                     </Text>
                   </View>
                 )}
               </View>
               {exp.bulletPoints &&
                 exp.bulletPoints.slice(1).map((bp, bidx) => (
-                  <View key={bidx + 1} style={styles.bulletRow}>
-                    <Text style={styles.bulletPoint}>-</Text>
-                    <Text style={styles.bulletText}>{renderBulletHtml(bp, styles.boldText)}</Text>
+                  <View key={bidx + 1} style={baseStyles.bulletRow}>
+                    <Text style={baseStyles.bulletPoint}>—</Text>
+                    <Text style={baseStyles.bulletText}>
+                      {renderBulletHtml(bp, baseStyles.boldText)}
+                    </Text>
                   </View>
                 ))}
             </View>
@@ -246,84 +282,98 @@ const ExperienceSection = ({ data }: { data: CVData }) => {
   );
 };
 
-/* --------- Minimalist CV --------- */
+/* --------- Swiss Minimalist CV (formerly Minimalist) --------- */
 
-export const MinimalistCV = ({ data }: { data: CVData }) => (
-  <Document title="cv">
-    <Page size="A4" style={styles.page}>
-      <DocumentHeader data={data} />
+export const MinimalistCV = ({ data, colors }: { data: CVData; colors?: ColorPalette }) => {
+  const c = colors || COLOR_THEMES[DEFAULT_THEME];
+  return (
+    <Document title="cv">
+      <Page size="A4" style={baseStyles.page}>
+        <DocumentHeader data={data} colors={c} />
 
-      {data.summary && (
-        <View style={{ marginBottom: 12 }}>
-          <Text style={styles.summaryText}>{data.summary}</Text>
-        </View>
-      )}
+        {data.summary && (
+          <View>
+            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.PROFILE}</Text>
+            <Text style={baseStyles.summaryText}>{data.summary}</Text>
+          </View>
+        )}
 
-      <ExperienceSection data={data} />
+        <ExperienceSection data={data} colors={c} />
 
-      {data.skills && data.skills.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.SKILLS}</Text>
-          {data.skills.map((skill, idx) => (
-            <View key={idx} style={styles.skillRow}>
-              <Text style={styles.skillName}>{skill.name}</Text>
-              <Text style={styles.skillItems}>{skill.items}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {data.education && data.education.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.EDUCATION}</Text>
-          {data.education.map((edu, idx) => (
-            <View key={idx} style={styles.eduBlock} wrap={false}>
-              <View style={styles.eduLeft}>
-                <Text style={styles.eduDegree}>{edu.degree}</Text>
-                <Text style={styles.eduInst}>{edu.institution}</Text>
-                {edu.details && <Text style={styles.eduDetails}>{edu.details}</Text>}
+        {data.skills && data.skills.length > 0 && (
+          <View>
+            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.SKILLS}</Text>
+            {data.skills.map((skill, idx) => (
+              <View key={idx} style={baseStyles.skillRow} wrap={false}>
+                <Text style={baseStyles.skillName}>{skill.name}</Text>
+                <Text style={baseStyles.skillItems}>{skill.items}</Text>
               </View>
-              <View style={styles.eduRight}>
-                <Text>{edu.location}</Text>
+            ))}
+          </View>
+        )}
+
+        {data.education && data.education.length > 0 && (
+          <View>
+            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.EDUCATION}</Text>
+            {data.education.map((edu, idx) => (
+              <View key={idx} style={baseStyles.eduBlock} wrap={false}>
+                <View style={baseStyles.eduHeaderRow}>
+                  <Text style={baseStyles.eduDegree}>{edu.degree}</Text>
+                  <Text style={baseStyles.eduLocation}>{edu.location}</Text>
+                </View>
+                <Text style={baseStyles.eduInst}>{edu.institution}</Text>
+                {edu.details && <Text style={baseStyles.eduDetails}>{edu.details}</Text>}
               </View>
-            </View>
-          ))}
+            ))}
+          </View>
+        )}
+
+        {data.certifications && data.certifications.length > 0 && (
+          <View>
+            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.CERTIFICATIONS}</Text>
+            {data.certifications.map((cert, idx) => (
+              <View key={idx} style={baseStyles.certRow} wrap={false}>
+                <Text style={baseStyles.certName}>{cert.name}</Text>
+                <Text style={baseStyles.certDate}>{cert.date}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {data.other && (
+          <View style={baseStyles.otherSection} wrap={false}>
+            <Text style={baseStyles.sectionTitle}>{data.other.label}</Text>
+            <Text style={baseStyles.summaryText}>{data.other.value}</Text>
+          </View>
+        )}
+      </Page>
+    </Document>
+  );
+};
+
+/* --------- Swiss Minimalist Cover Letter (formerly Minimalist) --------- */
+
+export const MinimalistCoverLetter = ({
+  content,
+  data,
+  colors,
+}: {
+  content?: string;
+  data: CVData;
+  colors?: ColorPalette;
+}) => {
+  const c = colors || COLOR_THEMES[DEFAULT_THEME];
+  return (
+    <Document title="cover-letter">
+      <Page size="A4" style={baseStyles.page}>
+        <DocumentHeader data={data} colors={c} />
+        <View style={{ marginTop: 40 }}>
+          <Text style={baseStyles.sectionTitle}>Cover Letter</Text>
+          <Text style={{ fontSize: 9.5, lineHeight: 1.8, color: "#333333" }}>
+            {content || DEFAULT_COVER_LETTER(data.name)}
+          </Text>
         </View>
-      )}
-
-      {data.certifications && data.certifications.length > 0 && (
-        <View>
-          <Text style={styles.sectionTitle}>{SECTION_LABELS.CERTIFICATIONS}</Text>
-          {data.certifications.map((cert, idx) => (
-            <View key={idx} style={styles.certRow} wrap={false}>
-              <Text style={styles.certName}>{cert.name}</Text>
-              <Text style={styles.certDate}>{cert.date}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {data.other && (
-        <View style={styles.otherSection} wrap={false}>
-          <Text style={styles.sectionTitle}>{data.other.label}</Text>
-          <Text style={styles.summaryText}>{data.other.value}</Text>
-        </View>
-      )}
-    </Page>
-  </Document>
-);
-
-/* --------- Minimalist Cover Letter --------- */
-
-export const MinimalistCoverLetter = ({ content, data }: { content?: string; data: CVData }) => (
-  <Document title="cover-letter">
-    <Page size="A4" style={styles.page}>
-      <DocumentHeader data={data} />
-      <View style={{ marginTop: 32 }}>
-        <Text style={{ fontSize: 10, lineHeight: 1.8 }}>
-          {content || DEFAULT_COVER_LETTER(data.name)}
-        </Text>
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
+};
