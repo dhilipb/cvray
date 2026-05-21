@@ -49,5 +49,5 @@
 ## Development Workflow
 
 - **Gemini Dev Hook:** This project uses a custom Webpack plugin (`scripts/gemini-webpack-plugin.mjs`) registered in `next.config.mjs`.
-- **How it works:** Every time you run `yarn dev`, the server is automatically "hooked". If a compilation error occurs, Gemini will automatically launch in an interactive session to help you fix it.
-- **Opt-out:** To run the dev server without Gemini, use `SKIP_GEMINI=1 yarn dev`.
+- **How it works:** Every time you run `pnpm dev`, the server is automatically "hooked". If a compilation error occurs, Gemini will automatically launch in an interactive session to help you fix it.
+- **Opt-out:** To run the dev server without Gemini, use `SKIP_GEMINI=1 pnpm dev`.

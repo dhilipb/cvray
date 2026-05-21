@@ -1,0 +1,10 @@
+node_modules
+.next
+dev.db
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+*.db
+*.db-journal
+dist
+build

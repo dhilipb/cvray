@@ -23,9 +23,9 @@ Font.register({
   src: "https://fonts.cdnfonts.com/s/16061/Georgia.woff",
 });
 
-export * from "./classic";
-export * from "./modern";
-export * from "./minimalist";
-export * from "./professional";
 export * from "./creative";
+export * from "./minimalist";
+export * from "./modern";
+export * from "./professional";
+export * from "./constants";
 export { COLOR_THEMES, DEFAULT_THEME, type ColorPalette, type ThemeId } from "./themes";

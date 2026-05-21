@@ -18,22 +18,22 @@ This project uses **ESLint**, **TypeScript (TSC)**, and **Prettier** to maintain
 
 ### Available Scripts
 
-- `yarn lint`: Run Next.js linting.
-- `yarn type-check`: Run TypeScript type checking.
-- `yarn format`: Format the codebase with Prettier.
-- `yarn format:check`: Check if the codebase follows Prettier formatting.
-- `yarn check-all`: Run all the above checks (Lint + TSC + Prettier Check).
+- `pnpm lint`: Run Next.js linting.
+- `pnpm type-check`: Run TypeScript type checking.
+- `pnpm format`: Format the codebase with Prettier.
+- `pnpm format:check`: Check if the codebase follows Prettier formatting.
+- `pnpm check-all`: Run all the above checks (Lint + TSC + Prettier Check).
 
 ### Pre-commit Hook
 
-A Husky pre-commit hook is configured to run `yarn check-all` before any commit. If any check fails, the commit will be blocked.
+A Husky pre-commit hook is configured to run `pnpm check-all` before any commit. If any check fails, the commit will be blocked.
 
 ## Getting Started
 
 First, install the dependencies:
 
 ```bash
-yarn install
+pnpm install
 ```
 
 Set up your environment variables by copying `.env.example` to `.env` and filling in the values:
@@ -52,7 +52,7 @@ npx prisma generate
 Then, run the development server:
 
 ```bash
-yarn dev
+pnpm dev
 ```
 
 Open [http://localhost:3344](http://localhost:3344) with your browser to see the result.

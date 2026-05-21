@@ -25,8 +25,6 @@ import { AIChatAssistant } from "./_components/AIChatAssistant";
 import { CVData } from "@/lib/types";
 import dynamic from "next/dynamic";
 import {
-  ClassicCV,
-  ClassicCoverLetter,
   ModernCV,
   ModernCoverLetter,
   MinimalistCV,
@@ -40,25 +38,18 @@ import {
   type ThemeId,
 } from "@/components/cv/templates";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+
 import CropFreeIcon from "@mui/icons-material/CropFree";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 
 const TEMPLATES = {
-  classic: {
-    id: "classic",
-    name: "Classic",
-    cv: ClassicCV,
-    coverLetter: ClassicCoverLetter,
-    icon: HistoryEduIcon,
-  },
   modern: {
     id: "modern",
     name: "Modern",
     cv: ModernCV,
     coverLetter: ModernCoverLetter,
-    icon: AutoAwesomeIcon,
+    icon: HistoryEduIcon,
   },
   minimalist: {
     id: "minimalist",
@@ -236,7 +227,7 @@ export default function JobCVPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
-  const [templateId, setTemplateId] = useState<TemplateId>("classic");
+  const [templateId, setTemplateId] = useState<TemplateId>("modern");
   const [themeId, setThemeId] = useState<ThemeId>(DEFAULT_THEME);
 
   const [localCvData, setLocalCvData] = useState<CVData | null>(null);
