@@ -1,4 +1,4 @@
-import { authOptions } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import {
@@ -9,7 +9,6 @@ import {
   safeValidateUIMessages,
   type UIMessage,
 } from "ai";
-import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import { getChatTools } from "./tools";
 import { CVData } from "@/lib/types";
@@ -30,7 +29,7 @@ const json = (body: unknown, status: number) =>
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
     if (!session?.user?.id) {
       return json({ error: "Unauthorized" }, 401);
     }

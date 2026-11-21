@@ -1,9 +1,8 @@
-import { authOptions } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cvSchema } from "@/lib/schemas/cv";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText, Output } from "ai";
-import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -39,7 +38,7 @@ const textField = (value: FormDataEntryValue | null) =>
 export async function POST(req: NextRequest) {
   try {
     // Auth before reading the body so anonymous callers cannot make us buffer uploads
-    const session = await getServerSession(authOptions);
+    const session = await getAuthSession();
 
     if (!session?.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

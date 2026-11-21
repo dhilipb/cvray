@@ -5,9 +5,8 @@ import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import Image from "next/image";
 import { SignInButton } from "@/components/auth/SignInButton";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 
 const FEATURES = [
   {
@@ -30,7 +29,7 @@ const FEATURES = [
 /* --------- Page --------- */
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
 
   if (session) {
     redirect("/profiles");

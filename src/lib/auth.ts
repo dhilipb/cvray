@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, Session, getServerSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 
@@ -44,3 +44,21 @@ export const authOptions: NextAuthOptions = {
   // debug logs tokens and secrets; never enable in production
   debug: process.env.NODE_ENV === "development",
 };
+
+/* --------- Temporary auth bypass --------- */
+
+// Set AUTH_DISABLED=true in .env to skip login locally; ignored in production builds
+export const AUTH_DISABLED =
+  process.env.AUTH_DISABLED === "true" && process.env.NODE_ENV !== "production";
+
+const GUEST_EMAIL = "guest@localhost";
+
+export async function getAuthSession(): Promise<Session | null> {
+  if (!AUTH_DISABLED) return getServerSession(authOptions);
+  const user = await prisma.user.upsert({
+    where: { email: GUEST_EMAIL },
+    update: {},
+    create: { email: GUEST_EMAIL, name: "Guest" },
+  });
+  return { user: { id: user.id, name: user.name, email: user.email }, expires: "" };
+}

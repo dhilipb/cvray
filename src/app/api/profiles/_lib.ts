@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 import { z } from "zod";
-import { authOptions } from "@/lib/auth";
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 /* --------- Shared helpers for /api/profiles routes --------- */
 
 export async function getUserId(): Promise<string | null> {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   return session?.user?.id ?? null;
 }
 
