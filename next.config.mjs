@@ -15,7 +15,7 @@ const csp = [
   "worker-src 'self' blob:",
   "object-src 'self' blob:",
   "base-uri 'self'",
-  "form-action 'self' https://accounts.google.com",
+  "form-action 'self'",
   "frame-ancestors 'self'",
 ].join("; ");
 

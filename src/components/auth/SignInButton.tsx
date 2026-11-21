@@ -9,44 +9,61 @@ import { useRouter } from "next/navigation";
 
 export const SignInButton = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [mode, setMode] = useState<"signin" | "register">("signin");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const registering = mode === "register";
 
-  const handleSignIn = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await signIn("credentials", { email, password, redirect: false });
-    setLoading(false);
-    if (res?.ok) router.push("/profiles");
-    else setError("Invalid email or password");
+    try {
+      if (registering) {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          setError(body.error ?? "Registration failed");
+          return;
+        }
+      }
+      const res = await signIn("credentials", { username, password, redirect: false });
+      if (res?.ok) router.push("/profiles");
+      else setError("Invalid username or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Stack
       component="form"
-      onSubmit={handleSignIn}
+      onSubmit={handleSubmit}
       spacing={2}
       sx={{ width: "100%", maxWidth: 360, mx: "auto" }}
     >
       {error && <Alert severity="error">{error}</Alert>}
       <TextField
-        label="Email"
-        type="email"
-        autoComplete="email"
+        label="Username"
+        autoComplete="username"
         required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
       />
       <TextField
         label="Password"
         type="password"
-        autoComplete="current-password"
+        autoComplete={registering ? "new-password" : "current-password"}
         required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        helperText={registering ? "At least 8 characters" : undefined}
       />
       <Button
         type="submit"
@@ -66,7 +83,17 @@ export const SignInButton = () => {
           },
         }}
       >
-        Sign in
+        {registering ? "Create account" : "Sign in"}
+      </Button>
+      <Button
+        variant="text"
+        onClick={() => {
+          setMode(registering ? "signin" : "register");
+          setError("");
+        }}
+        sx={{ textTransform: "none" }}
+      >
+        {registering ? "Have an account? Sign in" : "No account? Register"}
       </Button>
     </Stack>
   );

@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "crypto";
+import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { NextAuthOptions, Session, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
@@ -18,24 +18,20 @@ declare module "next-auth" {
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Single fixed account: LOGIN_EMAIL / LOGIN_PASSWORD from the environment
     CredentialsProvider({
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = process.env.LOGIN_EMAIL;
-        const password = process.env.LOGIN_PASSWORD;
-        if (!email || !password || !credentials) return null;
-        if (!safeEqual(credentials.email.trim().toLowerCase(), email.toLowerCase())) return null;
-        if (!safeEqual(credentials.password, password)) return null;
-        const user = await prisma.user.upsert({
-          where: { email },
-          update: {},
-          create: { email, name: email.split("@")[0] },
+        if (!credentials?.username || !credentials.password) return null;
+        const user = await prisma.user.findUnique({
+          where: { username: credentials.username.trim().toLowerCase() },
         });
-        return { id: user.id, name: user.name, email: user.email };
+        if (!user?.passwordHash || !verifyPassword(credentials.password, user.passwordHash)) {
+          return null;
+        }
+        return { id: user.id, name: user.username };
       },
     }),
   ],
@@ -60,10 +56,20 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
 };
 
-function safeEqual(a: string, b: string): boolean {
-  const x = Buffer.from(a);
-  const y = Buffer.from(b);
-  return x.length === y.length && timingSafeEqual(x, y);
+/* --------- Passwords --------- */
+
+// scrypt from node:crypto, stored as "salt:hash" (hex)
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  return `${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
+}
+
+function verifyPassword(password: string, stored: string): boolean {
+  const [salt, hash] = stored.split(":");
+  if (!salt || !hash) return false;
+  const expected = Buffer.from(hash, "hex");
+  const actual = scryptSync(password, salt, expected.length);
+  return timingSafeEqual(actual, expected);
 }
 
 /* --------- Temporary auth bypass --------- */
