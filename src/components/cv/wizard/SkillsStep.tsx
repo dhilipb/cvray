@@ -1,5 +1,7 @@
-import { TextField, Typography, Box, Button, IconButton, Stack, Paper } from "@mui/material";
-import { Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
+import { TextField, Typography, Box, Button, Stack, Paper } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
+import { EntryHeader } from "./EntryHeader";
+import { moveItem } from "./utils";
 import { CVData, SkillCategory } from "@/lib/types";
 
 interface Props {
@@ -39,21 +41,13 @@ export function SkillsStep({ data, updateData }: Props) {
           variant="outlined"
         >
           <Stack spacing={1.5}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                Category {index + 1}
-              </Typography>
-              {data.skills.length > 1 && (
-                <IconButton
-                  onClick={() => removeSkill(index)}
-                  color="error"
-                  size="small"
-                  sx={{ p: 0.5 }}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
+            <EntryHeader
+              title={`Category ${index + 1}`}
+              index={index}
+              count={data.skills.length}
+              onMove={(from, to) => updateData({ skills: moveItem(data.skills, from, to) })}
+              onRemove={() => removeSkill(index)}
+            />
             <TextField
               fullWidth
               size="small"

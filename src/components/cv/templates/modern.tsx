@@ -7,6 +7,7 @@ import {
   formatLinkUrl,
   SECTION_LABELS,
   DEFAULT_COVER_LETTER,
+  getOrderedSectionIds,
 } from "./constants";
 import { ColorPalette, COLOR_THEMES, DEFAULT_THEME } from "./themes";
 
@@ -22,7 +23,9 @@ const baseStyles = StyleSheet.create({
     marginBottom: 12,
   },
   name: {
-    fontFamily: "Times-Bold",
+    // Merriweather (embedded) instead of built-in Times-Bold, which can't render non-Latin-1 names.
+    fontFamily: "Merriweather",
+    fontWeight: 700,
     fontSize: 24,
     color: "#1a1a2e",
     marginBottom: 4,
@@ -115,6 +118,8 @@ const baseStyles = StyleSheet.create({
     fontWeight: 700,
     color: "#222222",
     fontSize: 11,
+    flex: 1,
+    paddingRight: 8,
   },
   expDates: {
     color: "#888888",
@@ -200,22 +205,28 @@ const DocumentHeader = ({ data, colors }: { data: CVData; colors: ColorPalette }
 
 /* --------- Modern CV --------- */
 
+/* --------- Modern CV --------- */
+
 export const ModernCV = ({ data, colors }: { data: CVData; colors?: ColorPalette }) => {
   const c = colors || COLOR_THEMES[DEFAULT_THEME];
-  return (
-    <Document title="cv">
-      <Page size="A4" style={baseStyles.page}>
-        <DocumentHeader data={data} colors={c} />
-        {data.summary && (
-          <View style={[baseStyles.summaryContainer, { borderLeftColor: c.primary }]}>
+
+  const orderedSectionIds = getOrderedSectionIds(data);
+
+  const renderSection = (sectionId: string) => {
+    switch (sectionId) {
+      case "summary":
+        if (!data.summary) return null;
+        return (
+          <View key="summary" style={[baseStyles.summaryContainer, { borderLeftColor: c.primary }]}>
             <Text style={baseStyles.summaryText}>{data.summary}</Text>
           </View>
-        )}
-        {data.skills && data.skills.length > 0 && (
-          <View>
-            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
-              {SECTION_LABELS.CORE_COMPETENCIES}
-            </Text>
+        );
+      case "skills":
+        if (!data.skills || data.skills.length === 0) return null;
+        const skillsLabel = data.sectionLabels?.skills || SECTION_LABELS.CORE_COMPETENCIES;
+        return (
+          <View key="skills">
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{skillsLabel}</Text>
             <View style={baseStyles.skillsContainer}>
               {data.skills.map((skill, idx) => (
                 <View
@@ -231,12 +242,13 @@ export const ModernCV = ({ data, colors }: { data: CVData; colors?: ColorPalette
               ))}
             </View>
           </View>
-        )}
-        {data.experience && data.experience.length > 0 && (
-          <View>
-            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
-              {SECTION_LABELS.PROFESSIONAL_EXPERIENCE}
-            </Text>
+        );
+      case "experience":
+        if (!data.experience || data.experience.length === 0) return null;
+        const expLabel = data.sectionLabels?.experience || SECTION_LABELS.PROFESSIONAL_EXPERIENCE;
+        return (
+          <View key="experience">
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{expLabel}</Text>
             {data.experience.map((exp, idx) => (
               <View key={idx} style={baseStyles.expBlock} break={idx === 0 ? false : exp.break}>
                 {exp.bulletPoints && exp.bulletPoints.length > 0 ? (
@@ -275,12 +287,13 @@ export const ModernCV = ({ data, colors }: { data: CVData; colors?: ColorPalette
               </View>
             ))}
           </View>
-        )}
-        {data.education && data.education.length > 0 && (
-          <View>
-            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
-              {SECTION_LABELS.EDUCATION}
-            </Text>
+        );
+      case "education":
+        if (!data.education || data.education.length === 0) return null;
+        const eduLabel = data.sectionLabels?.education || SECTION_LABELS.EDUCATION;
+        return (
+          <View key="education">
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{eduLabel}</Text>
             {data.education.map((edu, idx) => (
               <View key={idx} style={baseStyles.eduBlock} wrap={false}>
                 <Text style={baseStyles.eduDegree}>{edu.degree}</Text>
@@ -292,12 +305,13 @@ export const ModernCV = ({ data, colors }: { data: CVData; colors?: ColorPalette
               </View>
             ))}
           </View>
-        )}
-        {data.certifications && data.certifications.length > 0 && (
-          <View>
-            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>
-              {SECTION_LABELS.CERTIFICATIONS}
-            </Text>
+        );
+      case "certifications":
+        if (!data.certifications || data.certifications.length === 0) return null;
+        const certLabel = data.sectionLabels?.certifications || SECTION_LABELS.CERTIFICATIONS;
+        return (
+          <View key="certifications">
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{certLabel}</Text>
             {data.certifications.map((cert, idx) => (
               <View key={idx} style={baseStyles.certRow} wrap={false}>
                 <Text style={[baseStyles.bulletPoint, { color: c.primary }]}>›</Text>
@@ -308,13 +322,57 @@ export const ModernCV = ({ data, colors }: { data: CVData; colors?: ColorPalette
               </View>
             ))}
           </View>
-        )}
-        {data.other && (
-          <View wrap={false}>
-            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{data.other.label}</Text>
+        );
+      case "other":
+        if (!data.other) return null;
+        const otherLabel = data.sectionLabels?.other || data.other.label;
+        return (
+          <View key="other" wrap={false}>
+            <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{otherLabel}</Text>
             <Text style={baseStyles.summaryText}>{data.other.value}</Text>
           </View>
-        )}
+        );
+      default:
+        // Render custom sections
+        const customSec = data.customSections?.find((s) => s.id === sectionId);
+        if (customSec) {
+          if (
+            !customSec.content &&
+            (!customSec.bulletPoints || customSec.bulletPoints.length === 0)
+          )
+            return null;
+          return (
+            <View key={customSec.id}>
+              <Text style={[baseStyles.sectionTitle, { color: c.primary }]}>{customSec.title}</Text>
+              {customSec.content && (
+                <View style={[baseStyles.summaryContainer, { borderLeftColor: c.primary }]}>
+                  <Text style={baseStyles.summaryText}>{customSec.content}</Text>
+                </View>
+              )}
+              {customSec.bulletPoints && customSec.bulletPoints.length > 0 && (
+                <View style={{ marginTop: 4 }}>
+                  {customSec.bulletPoints.map((bp, bidx) => (
+                    <View key={bidx} style={baseStyles.bulletRow}>
+                      <Text style={[baseStyles.bulletPoint, { color: c.primary }]}>›</Text>
+                      <Text style={baseStyles.bulletText}>
+                        {renderBulletHtml(bp, baseStyles.boldText)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        }
+        return null;
+    }
+  };
+
+  return (
+    <Document title={`${data.name || "CV"} - CV`} author={data.name}>
+      <Page size="A4" style={baseStyles.page}>
+        <DocumentHeader data={data} colors={c} />
+        {orderedSectionIds.map((sectionId) => renderSection(sectionId))}
       </Page>
     </Document>
   );
@@ -333,7 +391,7 @@ export const ModernCoverLetter = ({
 }) => {
   const c = colors || COLOR_THEMES[DEFAULT_THEME];
   return (
-    <Document title="cover-letter">
+    <Document title={`${data.name || "Cover"} - Cover Letter`} author={data.name}>
       <Page size="A4" style={baseStyles.page}>
         <DocumentHeader data={data} colors={c} />
         <View style={{ marginTop: 24 }}>

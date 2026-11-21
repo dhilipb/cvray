@@ -26,6 +26,10 @@ yarn-error.log*
 .env
 .env*.local
 
+# local databases (dev.db is still tracked: run `git rm --cached dev.db`)
+*.db
+*.db-journal
+
 # vercel
 .vercel
 

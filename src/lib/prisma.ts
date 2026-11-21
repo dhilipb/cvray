@@ -1,14 +1,16 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 /* --------- Prisma Configuration --------- */
 
 const prismaClientSingleton = () => {
-  const url = process.env.DATABASE_URL || "file:./dev.db";
-  const adapter = new PrismaLibSql({
-    url: url,
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is not set");
+  const adapter = new PrismaPg({ connectionString });
+  return new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === "development" ? ["query"] : ["error"],
   });
-  return new PrismaClient({ adapter, log: ["query"] });
 };
 
 const globalForPrisma = globalThis as unknown as {

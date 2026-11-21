@@ -1,33 +1,20 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUserId, serverError, unauthorized } from "./_lib";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
     const profiles = await prisma.userProfile.findMany({
-      where: {
-        userId: userId,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      include: { _count: { select: { JobApplications: true } } },
     });
 
     return NextResponse.json({ success: true, profiles });
   } catch (error: unknown) {
-    console.error("Fetch Profiles Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 },
-    );
+    return serverError("Fetch Profiles Error:", error);
   }
 }

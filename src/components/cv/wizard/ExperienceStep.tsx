@@ -10,7 +10,9 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
-import { Delete as DeleteIcon, Add as AddIcon, Remove as RemoveIcon } from "@mui/icons-material";
+import { Add as AddIcon, Remove as RemoveIcon } from "@mui/icons-material";
+import { EntryHeader } from "./EntryHeader";
+import { moveItem, splitBullets } from "./utils";
 import { CVData, WorkExperience } from "@/lib/types";
 
 interface Props {
@@ -29,27 +31,35 @@ export function ExperienceStep({ data, updateData }: Props) {
     updateData({ experience: newExperience });
   };
 
-  const handleBulletPointChange = (expIndex: number, bulletIndex: number, value: string) => {
-    const newExperience = [...data.experience];
-    const newBullets = [...newExperience[expIndex].bulletPoints];
-    newBullets[bulletIndex] = value;
-    newExperience[expIndex].bulletPoints = newBullets;
-    updateData({ experience: newExperience });
-  };
+  // Replace bullets immutably (the old code mutated the shared experience object).
+  const setBullets = (expIndex: number, bullets: string[]) =>
+    handleExperienceChange(expIndex, "bulletPoints", bullets);
 
-  const addBulletPoint = (expIndex: number) => {
-    const newExperience = [...data.experience];
-    newExperience[expIndex].bulletPoints = [...newExperience[expIndex].bulletPoints, ""];
-    updateData({ experience: newExperience });
-  };
-
-  const removeBulletPoint = (expIndex: number, bulletIndex: number) => {
-    const newExperience = [...data.experience];
-    newExperience[expIndex].bulletPoints = newExperience[expIndex].bulletPoints.filter(
-      (_, i) => i !== bulletIndex,
+  const handleBulletPointChange = (expIndex: number, bulletIndex: number, value: string) =>
+    setBullets(
+      expIndex,
+      data.experience[expIndex].bulletPoints.map((b, i) => (i === bulletIndex ? value : b)),
     );
-    updateData({ experience: newExperience });
+
+  // Pasting several lines into a bullet splits them into separate bullets.
+  const handleBulletPaste = (e: React.ClipboardEvent, expIndex: number, bulletIndex: number) => {
+    const lines = splitBullets(e.clipboardData.getData("text"));
+    if (lines.length < 2) return;
+    e.preventDefault();
+    const bullets = [...data.experience[expIndex].bulletPoints];
+    const current = bullets[bulletIndex].trim();
+    bullets.splice(bulletIndex, 1, ...(current ? [current, ...lines] : lines));
+    setBullets(expIndex, bullets);
   };
+
+  const addBulletPoint = (expIndex: number) =>
+    setBullets(expIndex, [...data.experience[expIndex].bulletPoints, ""]);
+
+  const removeBulletPoint = (expIndex: number, bulletIndex: number) =>
+    setBullets(
+      expIndex,
+      data.experience[expIndex].bulletPoints.filter((_, i) => i !== bulletIndex),
+    );
 
   const addExperience = () => {
     updateData({
@@ -73,23 +83,13 @@ export function ExperienceStep({ data, updateData }: Props) {
 
       {data.experience.map((exp, index) => (
         <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: "background.default" }} variant="outlined">
-          <Box
-            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Experience {index + 1}
-            </Typography>
-            {data.experience.length > 1 && (
-              <IconButton
-                onClick={() => removeExperience(index)}
-                color="error"
-                size="small"
-                sx={{ p: 0.5 }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
-          </Box>
+          <EntryHeader
+            title={`Experience ${index + 1}`}
+            index={index}
+            count={data.experience.length}
+            onMove={(from, to) => updateData({ experience: moveItem(data.experience, from, to) })}
+            onRemove={() => removeExperience(index)}
+          />
 
           <Grid container spacing={1.5}>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -168,12 +168,17 @@ export function ExperienceStep({ data, updateData }: Props) {
                       multiline
                       value={bullet}
                       onChange={(e) => handleBulletPointChange(index, bIndex, e.target.value)}
-                      placeholder="Enter achievement..."
+                      onPaste={(e) => handleBulletPaste(e, index, bIndex)}
+                      placeholder="Enter achievement (paste several lines to split)..."
+                      slotProps={{
+                        htmlInput: { "aria-label": `Experience ${index + 1} bullet ${bIndex + 1}` },
+                      }}
                       sx={{ "& .MuiInputBase-root": { fontSize: "0.8rem" } }}
                     />
                     <IconButton
                       onClick={() => removeBulletPoint(index, bIndex)}
                       disabled={exp.bulletPoints.length === 1}
+                      aria-label={`Remove bullet ${bIndex + 1}`}
                       size="small"
                       sx={{ p: 0.5 }}
                     >

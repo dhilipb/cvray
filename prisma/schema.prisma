@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model User {
@@ -80,6 +80,8 @@ model JobApplication {
   url            String?
   jobDescription String?
   tweakedCvJson  String?
+  notes          String?
+  updatedAt      DateTime    @default(now()) @updatedAt
   userProfileId  String
   userProfile    UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 }

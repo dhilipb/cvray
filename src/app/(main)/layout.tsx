@@ -4,10 +4,12 @@ import React from "react";
 import { Box, AppBar, Toolbar, Typography } from "@mui/material";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isFullWidth = pathname?.includes("/cv");
+  // Match the /cv segment exactly; ids may contain "cv" as a substring
+  const isFullWidth = /\/cv(\/|$)/.test(pathname ?? "");
 
   return (
     <Box
@@ -34,8 +36,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <Typography
               variant="h5"
               noWrap
-              component="div"
+              component={Link}
+              href="/profiles"
               sx={{
+                textDecoration: "none",
                 fontWeight: 800,
                 background: "linear-gradient(to right, #10b981 0%, #059669 100%)",
                 WebkitBackgroundClip: "text",
@@ -58,8 +62,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           flexGrow: 1,
           display: isFullWidth ? "flex" : "block",
           flexDirection: "column",
-          p: isFullWidth ? 0 : 3,
-          pt: isFullWidth ? 0 : 12, // Offset for the fixed AppBar only if it's shown
+          p: isFullWidth ? 0 : { xs: 2, sm: 3 },
+          pt: isFullWidth ? 0 : { xs: 10, sm: 12 }, // Offset for the fixed AppBar only if it's shown
           maxWidth: isFullWidth ? "100%" : "1200px",
           width: "100%",
           mx: "auto",

@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
+import {
+  findOwnedProfile,
+  getUserId,
+  isAiRateLimited,
+  jobCreateSchema,
+  jsonError,
+  parseBody,
+  serverError,
+  unauthorized,
+} from "../../_lib";
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ profileId: string }> },
 ) {
   try {
     const { profileId } = await params;
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
     // Verify ownership of the profile
     const profile = await prisma.userProfile.findFirst({
@@ -35,7 +38,7 @@ export async function GET(
     });
 
     if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      return jsonError("Profile not found", 404);
     }
 
     return NextResponse.json({
@@ -44,11 +47,7 @@ export async function GET(
       profileName: profile.name,
     });
   } catch (error: unknown) {
-    console.error("Fetch Jobs Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 },
-    );
+    return serverError("Fetch Jobs Error:", error);
   }
 }
 
@@ -58,28 +57,28 @@ export async function POST(
 ) {
   try {
     const { profileId } = await params;
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
     // Verify ownership
-    const profile = await prisma.userProfile.findFirst({
-      where: { id: profileId, userId: userId },
-    });
+    const profile = await findOwnedProfile(userId, profileId);
 
     if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      return jsonError("Profile not found", 404);
     }
 
-    const { company, role, jobDescription, url } = await req.json();
+    const parsed = await parseBody(req, jobCreateSchema);
+    if ("error" in parsed) return parsed.error;
+    const { company, role, jobDescription, url, status, notes } = parsed.data;
 
     let tweakedCvJson = undefined;
 
-    if (jobDescription && profile.parsedProfileJson) {
+    const useAi = !!jobDescription && !!profile.parsedProfileJson;
+    if (useAi && isAiRateLimited(userId)) {
+      return jsonError("Too many AI requests, try again later", 429);
+    }
+
+    if (useAi && profile.parsedProfileJson) {
       try {
         const cvData = JSON.parse(profile.parsedProfileJson);
         const google = createGoogleGenerativeAI({
@@ -122,6 +121,8 @@ ${JSON.stringify(cvData, null, 2)}`;
         role,
         jobDescription,
         url,
+        status,
+        notes,
         userProfileId: profileId,
         tweakedCvJson,
       },
@@ -129,10 +130,6 @@ ${JSON.stringify(cvData, null, 2)}`;
 
     return NextResponse.json({ success: true, job });
   } catch (error: unknown) {
-    console.error("Create Job Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 },
-    );
+    return serverError("Create Job Error:", error);
   }
 }

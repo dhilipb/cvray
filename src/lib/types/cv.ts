@@ -27,6 +27,22 @@ export interface Certification {
   date: string;
 }
 
+export interface CustomSection {
+  id: string;
+  title: string;
+  content?: string;
+  bulletPoints?: string[];
+}
+
+export interface SectionLabels {
+  summary?: string;
+  skills?: string;
+  experience?: string;
+  education?: string;
+  certifications?: string;
+  other?: string;
+}
+
 export interface CVData {
   name: string;
   title: string;
@@ -44,4 +60,11 @@ export interface CVData {
     label: string;
     value: string;
   };
+  sectionsOrder?: string[];
+  /** Section IDs (built-in or custom) excluded from rendering. */
+  hiddenSections?: string[];
+  customSections?: CustomSection[];
+  sectionLabels?: SectionLabels;
+  templateId?: string;
+  themeId?: string;
 }

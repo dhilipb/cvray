@@ -84,13 +84,22 @@ export const UserMenu = () => {
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
-      <Typography variant="body2" sx={{ mr: 2, color: "text.secondary", fontWeight: 500 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          mr: 2,
+          color: "text.secondary",
+          fontWeight: 500,
+          display: { xs: "none", sm: "block" },
+        }}
+      >
         Welcome, {session.user?.name?.split(" ")[0]}
       </Typography>
       <IconButton
         onClick={handleClick}
         size="small"
         sx={{ ml: 0 }}
+        aria-label="Account menu"
         aria-controls={open ? "account-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}

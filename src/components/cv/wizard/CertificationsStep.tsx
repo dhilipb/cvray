@@ -1,5 +1,7 @@
-import { TextField, Typography, Box, Button, IconButton, Paper, Grid } from "@mui/material";
-import { Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
+import { TextField, Typography, Box, Button, Paper, Grid } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
+import { EntryHeader } from "./EntryHeader";
+import { moveItem } from "./utils";
 import { CVData, Certification } from "@/lib/types";
 
 interface Props {
@@ -37,23 +39,15 @@ export function CertificationsStep({ data, updateData }: Props) {
           sx={{ p: 1.5, mb: 1.5, bgcolor: "background.default" }}
           variant="outlined"
         >
-          <Box
-            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Certification {index + 1}
-            </Typography>
-            {data.certifications.length > 1 && (
-              <IconButton
-                onClick={() => removeCert(index)}
-                color="error"
-                size="small"
-                sx={{ p: 0.5 }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
-          </Box>
+          <EntryHeader
+            title={`Certification ${index + 1}`}
+            index={index}
+            count={data.certifications.length}
+            onMove={(from, to) =>
+              updateData({ certifications: moveItem(data.certifications, from, to) })
+            }
+            onRemove={() => removeCert(index)}
+          />
 
           <Grid container spacing={1.5}>
             <Grid size={{ xs: 12, sm: 8 }}>

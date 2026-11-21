@@ -1,97 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  findOwnedJob,
+  getUserId,
+  jobUpdateSchema,
+  jsonError,
+  parseBody,
+  serverError,
+  unauthorized,
+} from "../../../_lib";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ profileId: string; jobId: string }> },
-) {
+type Params = { params: Promise<{ profileId: string; jobId: string }> };
+
+export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const { profileId, jobId } = await params;
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
     // Verify ownership of the profile and job
     const job = await prisma.jobApplication.findFirst({
-      where: {
-        id: jobId,
-        userProfileId: profileId,
-        userProfile: {
-          userId: userId,
-        },
-      },
-      include: {
-        userProfile: true,
-      },
+      where: { id: jobId, userProfileId: profileId, userProfile: { userId } },
+      include: { userProfile: true },
     });
 
-    if (!job) {
-      return NextResponse.json({ error: "Job application not found" }, { status: 404 });
-    }
+    if (!job) return jsonError("Job application not found", 404);
 
     return NextResponse.json({ success: true, job });
   } catch (error: unknown) {
-    console.error("Fetch Job Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 },
-    );
+    return serverError("Fetch Job Error:", error);
   }
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ profileId: string; jobId: string }> },
-) {
+export async function PUT(req: NextRequest, { params }: Params) {
   try {
     const { profileId, jobId } = await params;
-    const session = await getServerSession(authOptions);
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
 
-    if (!session?.user || !session.user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Only whitelisted fields pass the schema, so userProfileId/id can't be reassigned.
+    const parsed = await parseBody(req, jobUpdateSchema);
+    if ("error" in parsed) return parsed.error;
+
+    if (!(await findOwnedJob(userId, profileId, jobId))) {
+      return jsonError("Job application not found", 404);
     }
 
-    const userId = session.user.id;
-    const body = await req.json();
-    const { role, company, jobDescription } = body;
+    const job = await prisma.jobApplication.update({ where: { id: jobId }, data: parsed.data });
 
-    // Verify ownership
-    const existingJob = await prisma.jobApplication.findFirst({
-      where: {
-        id: jobId,
-        userProfileId: profileId,
-        userProfile: { userId },
-      },
-    });
-
-    if (!existingJob) {
-      return NextResponse.json(
-        { error: "Job application not found or unauthorized" },
-        { status: 404 },
-      );
-    }
-
-    const updatedJob = await prisma.jobApplication.update({
-      where: { id: jobId },
-      data: {
-        role: role !== undefined ? role : existingJob.role,
-        company: company !== undefined ? company : existingJob.company,
-        jobDescription: jobDescription !== undefined ? jobDescription : existingJob.jobDescription,
-      },
-    });
-
-    return NextResponse.json({ success: true, job: updatedJob });
+    return NextResponse.json({ success: true, job });
   } catch (error: unknown) {
-    console.error("Update Job Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 },
-    );
+    return serverError("Update Job Error:", error);
+  }
+}
+
+export { PUT as PATCH };
+
+export async function DELETE(_req: NextRequest, { params }: Params) {
+  try {
+    const { profileId, jobId } = await params;
+    const userId = await getUserId();
+    if (!userId) return unauthorized();
+
+    if (!(await findOwnedJob(userId, profileId, jobId))) {
+      return jsonError("Job application not found", 404);
+    }
+
+    await prisma.jobApplication.delete({ where: { id: jobId } });
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    return serverError("Delete Job Error:", error);
   }
 }

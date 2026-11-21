@@ -12,6 +12,8 @@ import {
   Button,
   IconButton,
   Alert,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -26,6 +28,8 @@ interface CreateProfileDialogProps {
 /* --------- CreateProfileDialog Component --------- */
 export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps) {
   const router = useRouter();
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [newName, setNewName] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -33,9 +37,16 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
   const [dialogError, setDialogError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file after removing it
+    if (!file) return;
+    // Mirrors the 5 MB server limit in /api/upload-cv
+    if (file.size > 5 * 1024 * 1024) {
+      setDialogError("File too large (max 5 MB)");
+      return;
     }
+    setDialogError(null);
+    setSelectedFile(file);
   };
 
   const handleUpload = async () => {
@@ -73,6 +84,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
   };
 
   const handleCancel = () => {
+    if (uploading) return;
     setNewName("");
     setNewDescription("");
     setSelectedFile(null);
@@ -86,13 +98,19 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
       onClose={handleCancel}
       maxWidth="sm"
       fullWidth
-      slotProps={{ paper: { sx: { bgcolor: "background.paper", backgroundImage: "none" } } }}
+      fullScreen={fullScreen}
+      aria-labelledby="create-profile-title"
     >
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, fontFamily: '"Outfit", sans-serif' }}>
+        <Typography
+          id="create-profile-title"
+          component="span"
+          variant="h6"
+          sx={{ fontWeight: 700, fontFamily: '"Outfit", sans-serif' }}
+        >
           Create New Profile
         </Typography>
-        <IconButton onClick={handleCancel} size="small">
+        <IconButton onClick={handleCancel} size="small" aria-label="Close" disabled={uploading}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -111,6 +129,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             variant="outlined"
+            slotProps={{ htmlInput: { maxLength: 500 } }}
           />
           <TextField
             label="Overview / High-level Description"
@@ -121,6 +140,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
             variant="outlined"
+            slotProps={{ htmlInput: { maxLength: 500 } }}
           />
 
           <Box>
@@ -141,7 +161,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
                   "&:hover": { borderColor: "#10b981" },
                 }}
               >
-                Click to upload or drag and drop (PDF, DOCX, TXT)
+                Click to upload your CV (PDF, DOCX, TXT · max 5 MB)
                 <input type="file" hidden accept=".pdf,.docx,.txt" onChange={handleFileChange} />
               </Button>
             ) : (
@@ -164,6 +184,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
                 </Box>
                 <IconButton
                   size="small"
+                  aria-label="Remove selected file"
                   onClick={() => setSelectedFile(null)}
                   sx={{ color: "text.secondary", "&:hover": { color: "error.main" } }}
                 >
@@ -176,7 +197,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
       </DialogContent>
 
       <DialogActions sx={{ p: 3 }}>
-        <Button onClick={handleCancel} sx={{ color: "text.secondary" }}>
+        <Button onClick={handleCancel} disabled={uploading} sx={{ color: "text.secondary" }}>
           Cancel
         </Button>
         <Button
@@ -190,7 +211,7 @@ export function CreateProfileDialog({ open, onClose }: CreateProfileDialogProps)
             fontWeight: 600,
           }}
         >
-          {uploading ? "Parsing CV..." : "Create Profile"}
+          {uploading ? (selectedFile ? "Parsing CV with AI..." : "Creating...") : "Create Profile"}
         </Button>
       </DialogActions>
     </Dialog>

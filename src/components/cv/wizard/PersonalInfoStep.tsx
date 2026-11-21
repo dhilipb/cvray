@@ -1,12 +1,14 @@
 import { TextField, Grid, Typography, Box } from "@mui/material";
 import { CVData } from "@/lib/types";
+import { StepErrors } from "./utils";
 
 interface Props {
   data: CVData;
   updateData: (data: Partial<CVData>) => void;
+  errors?: StepErrors;
 }
 
-export function PersonalInfoStep({ data, updateData }: Props) {
+export function PersonalInfoStep({ data, updateData, errors = {} }: Props) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateData({ [name]: value });
@@ -24,6 +26,9 @@ export function PersonalInfoStep({ data, updateData }: Props) {
             size="small"
             label="Full Name"
             name="name"
+            required
+            error={!!errors.name}
+            helperText={errors.name}
             value={data.name}
             onChange={handleChange}
             variant="outlined"
@@ -47,6 +52,8 @@ export function PersonalInfoStep({ data, updateData }: Props) {
             label="Email"
             name="email"
             type="email"
+            error={!!errors.email}
+            helperText={errors.email}
             value={data.email}
             onChange={handleChange}
             variant="outlined"

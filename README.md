@@ -6,7 +6,7 @@ A Next.js application for rendering and managing CVs and Cover Letters, with sup
 
 - **Framework:** Next.js (App Router)
 - **Authentication:** NextAuth.js (Google OAuth)
-- **Database:** Prisma with LibSQL/SQLite
+- **Database:** Prisma with PostgreSQL (`@prisma/adapter-pg`)
 - **UI Components:** Material UI (MUI)
 - **PDF Rendering:** @react-pdf/renderer
 - **AI:** Google Gemini
@@ -42,11 +42,17 @@ Set up your environment variables by copying `.env.example` to `.env` and fillin
 cp .env.example .env
 ```
 
-Sync the database and generate the Prisma client:
+Create a PostgreSQL database (e.g. `createdb cvray`) and point `DATABASE_URL` at it. Then sync the schema and generate the Prisma client:
 
 ```bash
 npx prisma db push
 npx prisma generate
+```
+
+Moving data from the old SQLite database (one-off, safe to re-run):
+
+```bash
+SQLITE_URL=file:./dev.db node scripts/migrate-sqlite-to-pg.mjs
 ```
 
 Then, run the development server:
@@ -72,6 +78,11 @@ Open [http://localhost:3344](http://localhost:3344) with your browser to see the
   - **Minimalist:** Ultra-clean black-and-white style with lightweight margins.
   - **Professional:** Structured academic/executive format using Times-Roman.
   - **Creative:** Sidebar-based dynamic emerald/obsidian modern layout.
+- **Dynamic CV Layout & Section Customization:**
+  - **Section Reordering:** Change the layout structure dynamically by specifying a custom order for CV sections (e.g. placing skills or summary at the top).
+  - **Custom Sections:** Easily add new custom sections (such as Projects, Languages, or Publications) complete with optional description paragraphs and bullet points.
+  - **Customizable Section Headings:** Rename standard section titles (e.g., renaming "Skills" to "Core Competencies" or "Experience" to "Employment History") to match specific targeting requirements.
+  - **AI Integration:** Seamlessly control layout, section titles, custom sections, and ordering via the conversational AI assistant. Powered by a set of granular, specialized AI tools (e.g., updating contact info, professional summary, individual work experience items, education, certifications, and page layout/ordering) that enable precise, fast, and token-efficient incremental updates.
 - **Smart Layout Page-Break Safeguards:** Automatic prevention of fragmented/broken experience lists on the very first work experience block to guarantee professional rendering on print/PDF generation.
 
 ## Project Structure

@@ -10,21 +10,30 @@ import {
   Chip,
   Button,
   Divider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
+import WorkOutlineIcon from "@mui/icons-material/WorkOutlined";
 import { Profile, CVData } from "@/lib/types";
+import { relativeTime } from "./jobUtils";
 
 /* --------- Interface & Props --------- */
+export type ProfileWithCount = Profile & { _count?: { JobApplications: number } };
+
 interface ProfileCardProps {
-  profile: Profile;
+  profile: ProfileWithCount;
   onClick: (id: string) => void;
   onEdit: (id: string) => void;
+  onDelete: (profile: ProfileWithCount) => void;
 }
 
 /* --------- ProfileCard Component --------- */
-export function ProfileCard({ profile, onClick, onEdit }: ProfileCardProps) {
+export function ProfileCard({ profile, onClick, onEdit, onDelete }: ProfileCardProps) {
+  const jobCount = profile._count?.JobApplications ?? 0;
   let cvData: CVData = {
     name: "",
     title: "",
@@ -121,6 +130,7 @@ export function ProfileCard({ profile, onClick, onEdit }: ProfileCardProps) {
 
       <CardActionArea
         onClick={() => onClick(profile.id)}
+        aria-label={`Open applications for ${profile.name}`}
         sx={{
           flexGrow: 1,
           p: 3,
@@ -271,44 +281,75 @@ export function ProfileCard({ profile, onClick, onEdit }: ProfileCardProps) {
           bgcolor: "rgba(9, 9, 11, 0.15)",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", color: "text.secondary", gap: 0.75 }}>
-          <CalendarTodayIcon sx={{ fontSize: 12, color: "rgba(255, 255, 255, 0.3)" }} />
-          <Typography
-            variant="caption"
-            sx={{ fontSize: "0.7rem", color: "rgba(255, 255, 255, 0.45)" }}
-          >
-            Updated {new Date(profile.updatedAt).toLocaleDateString()}
-          </Typography>
-        </Box>
-
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<EditIcon sx={{ fontSize: 13 }} />}
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(profile.id);
-          }}
+        <Box
           sx={{
-            borderColor: "rgba(16, 185, 129, 0.25)",
-            color: "#10b981",
-            fontSize: "0.75rem",
-            fontWeight: 600,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 2,
+            display: "flex",
+            alignItems: "center",
+            color: "text.secondary",
+            gap: 0.75,
             minWidth: 0,
-            textTransform: "none",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              borderColor: "#10b981",
-              bgcolor: "rgba(16, 185, 129, 0.05)",
-              boxShadow: "0 2px 8px rgba(16, 185, 129, 0.15)",
-            },
           }}
         >
-          Edit
-        </Button>
+          <WorkOutlineIcon sx={{ fontSize: 13, color: "rgba(255, 255, 255, 0.3)" }} />
+          <Typography
+            variant="caption"
+            sx={{ fontSize: "0.7rem", color: "rgba(255, 255, 255, 0.55)" }}
+          >
+            {jobCount} {jobCount === 1 ? "job" : "jobs"}
+          </Typography>
+          <CalendarTodayIcon sx={{ fontSize: 12, color: "rgba(255, 255, 255, 0.3)", ml: 1 }} />
+          <Tooltip title={new Date(profile.updatedAt).toLocaleString()}>
+            <Typography
+              variant="caption"
+              noWrap
+              sx={{ fontSize: "0.7rem", color: "rgba(255, 255, 255, 0.45)" }}
+            >
+              {relativeTime(profile.updatedAt)}
+            </Typography>
+          </Tooltip>
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+          <Tooltip title="Delete profile">
+            <IconButton
+              size="small"
+              aria-label={`Delete profile ${profile.name}`}
+              onClick={() => onDelete(profile)}
+              sx={{ color: "rgba(255,255,255,0.4)", "&:hover": { color: "error.main" } }}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<EditIcon sx={{ fontSize: 13 }} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(profile.id);
+            }}
+            sx={{
+              borderColor: "rgba(16, 185, 129, 0.25)",
+              color: "#10b981",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 2,
+              minWidth: 0,
+              textTransform: "none",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                borderColor: "#10b981",
+                bgcolor: "rgba(16, 185, 129, 0.05)",
+                boxShadow: "0 2px 8px rgba(16, 185, 129, 0.15)",
+              },
+            }}
+          >
+            Edit
+          </Button>
+        </Box>
       </CardActions>
     </Card>
   );

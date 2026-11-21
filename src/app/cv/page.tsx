@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Container, Button, Box } from "@mui/material";
+import { Container, Button, Box, Typography } from "@mui/material";
 import { CVData } from "@/lib/types";
 import CVWizard from "@/components/cv/CVWizard";
+import { parseCV } from "@/components/cv/wizard/utils";
 
 const SAMPLE_DATA: CVData = {
   name: "Sakthi Buddha",
@@ -120,44 +121,62 @@ const INITIAL_DATA: CVData = {
   },
 };
 
-export default function CVWizardPage() {
-  const [cvData, setCvData] = useState<CVData>(INITIAL_DATA);
+const DRAFT_KEY = "cvWizardData";
 
+// Module-level so the wizard's onChange effect gets a stable reference.
+function saveDraft(data: CVData) {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  } catch {
+    // Storage full or blocked (private mode): drafts are best-effort.
+  }
+}
+
+export default function CVWizardPage() {
+  const [cvData, setCvData] = useState<CVData | null>(null);
+  // Bumped to remount the wizard with new initial data.
+  const [version, setVersion] = useState(0);
+
+  // Restore the draft before mounting the wizard, so its first autosave cannot overwrite it.
   useEffect(() => {
-    const storedData = localStorage.getItem("cvWizardData");
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData);
-        const mergedData = {
-          ...INITIAL_DATA,
-          ...parsed,
-          skills: parsed.skills?.length ? parsed.skills : INITIAL_DATA.skills,
-          experience: parsed.experience?.length ? parsed.experience : INITIAL_DATA.experience,
-          education: parsed.education?.length ? parsed.education : INITIAL_DATA.education,
-          certifications: parsed.certifications?.length
-            ? parsed.certifications
-            : INITIAL_DATA.certifications,
-          other: { ...INITIAL_DATA.other, ...(parsed.other || {}) },
-        };
-        setCvData(mergedData);
-      } catch (e) {
-        console.error("Failed to parse stored CV data", e);
-      }
+    let draft = INITIAL_DATA;
+    try {
+      const stored = localStorage.getItem(DRAFT_KEY);
+      if (stored) draft = parseCV(stored);
+    } catch (e) {
+      console.error("Failed to restore CV draft", e);
     }
+    setCvData(draft);
   }, []);
 
-  const loadSampleData = () => {
-    setCvData(SAMPLE_DATA);
+  const replaceData = (data: CVData) => {
+    setCvData(data);
+    setVersion((v) => v + 1);
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 2 }}>
-      <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
-        <Button variant="outlined" size="small" onClick={loadSampleData}>
+    <Container maxWidth="md" sx={{ py: 2, px: { xs: 2, sm: 3 } }}>
+      <Box sx={{ mb: 2, display: "flex", flexWrap: "wrap", gap: 1, alignItems: "center" }}>
+        <Typography variant="caption" color="text.secondary" sx={{ flexGrow: 1 }}>
+          Drafts are saved automatically in this browser.
+        </Typography>
+        <Button
+          variant="text"
+          size="small"
+          color="error"
+          onClick={() => {
+            if (window.confirm("Clear all fields and discard the saved draft?")) {
+              replaceData(INITIAL_DATA);
+            }
+          }}
+        >
+          Start Over
+        </Button>
+        <Button variant="outlined" size="small" onClick={() => replaceData(SAMPLE_DATA)}>
           Load Sample Data
         </Button>
       </Box>
-      <CVWizard initialData={cvData} />
+      {cvData && <CVWizard key={version} initialData={cvData} onChange={saveDraft} />}
     </Container>
   );
 }

@@ -24,9 +24,13 @@
 - **Modular & High-Fidelity Profile Cards:** Upgraded, responsive card widgets featuring linear-gradient accent headers, glassmorphic layout backing, a custom neon radial-gradient initials avatar, a preview row of key skills, and an exceptionally premium, dynamic hover state.
 - **Job Tracking:** Nested routing (`/profiles/[profileId]/jobs`) tracks all applications tailored to a specific base profile, featuring status tracking, real-time filtering, sorting, and search. Includes a direct **Edit Profile** shortcut button for instant profile modifications.
 - **CV Tailoring Page:** A comprehensive workspace (`/profiles/[profileId]/jobs/[jobId]/cv`) featuring job details, an AI tailoring assistant, and live previews of the CV and cover letter.
-- **AI CV Assistant:** An interactive chatbot powered by Gemini Flash that can automatically modify CV data and cover letters using specialized tools (`updateCV`, `updateCoverLetter`).
+- **AI CV Assistant:** An interactive chatbot powered by Gemini Flash that can automatically modify CV data and cover letters. Driven by a suite of granular, specialized tools (e.g., `updatePersonalInfo`, `updateSummary`, `addWorkExperience`, `updateWorkExperience`, `deleteWorkExperience`, `updateSkills`, `addEducation`, `updateEducation`, `deleteEducation`, `addCertification`, `deleteCertification`, `togglePageBreak`, `updateSectionLabels`, `reorderSections`, `updateCustomSection`, `updateOtherSection`, `updateCoverLetter`, and `updateCV` as a fallback) to enable precise, fast, and token-efficient incremental edits.
 - **Dynamic Previews:** Side-by-side view of the CV and Cover Letter with instant updates as the AI modifies them.
 - **Dynamic PDF Generation:** Built-in CV viewing and PDF generation using `@react-pdf/renderer` across 5 highly customized styles (Classic, Modern, Minimalist, Professional, Creative).
+- **Dynamic CV Layout & Section Customization:** Allows users to order sections, add custom sections, and customize section titles/labels dynamically. Updates to sections propagate instantly through both the visual PDF templates and the AI tailoring chat assistant.
+  - **Section Reordering:** Order of sections is defined dynamically via `sectionsOrder` property.
+  - **Custom Sections:** Dynamic custom sections can be added via the `customSections` array.
+  - **Custom Section Labels:** Default section headings can be renamed via the `sectionLabels` mapping.
 - **Centralized PDF Utilities:** Shareable, lint-safe parser functions, clean URL formatters, and central text renderers imported from `src/components/cv/templates/constants.tsx`.
 - **Layout Integrity Safeguard:** Automatic prevention of fragmented/broken experience lists on the very first work experience block to ensure visual excellence and design coherence.
 

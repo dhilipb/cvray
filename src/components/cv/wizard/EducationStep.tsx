@@ -1,5 +1,7 @@
-import { TextField, Typography, Box, Button, IconButton, Paper, Grid } from "@mui/material";
-import { Delete as DeleteIcon, Add as AddIcon } from "@mui/icons-material";
+import { TextField, Typography, Box, Button, Paper, Grid } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
+import { EntryHeader } from "./EntryHeader";
+import { moveItem } from "./utils";
 import { CVData, Education } from "@/lib/types";
 
 interface Props {
@@ -33,23 +35,13 @@ export function EducationStep({ data, updateData }: Props) {
 
       {data.education.map((edu, index) => (
         <Paper key={index} sx={{ p: 2, mb: 2, bgcolor: "background.default" }} variant="outlined">
-          <Box
-            sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Education {index + 1}
-            </Typography>
-            {data.education.length > 1 && (
-              <IconButton
-                onClick={() => removeEducation(index)}
-                color="error"
-                size="small"
-                sx={{ p: 0.5 }}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
-          </Box>
+          <EntryHeader
+            title={`Education ${index + 1}`}
+            index={index}
+            count={data.education.length}
+            onMove={(from, to) => updateData({ education: moveItem(data.education, from, to) })}
+            onRemove={() => removeEducation(index)}
+          />
 
           <Grid container spacing={1.5}>
             <Grid size={12}>

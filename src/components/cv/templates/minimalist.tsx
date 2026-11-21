@@ -7,6 +7,7 @@ import {
   formatLinkUrl,
   SECTION_LABELS,
   DEFAULT_COVER_LETTER,
+  getOrderedSectionIds,
 } from "./constants";
 import { ColorPalette, COLOR_THEMES, DEFAULT_THEME } from "./themes";
 
@@ -227,82 +228,32 @@ const DocumentHeader = ({ data, colors }: { data: CVData; colors: ColorPalette }
   );
 };
 
-/* --------- Experience Renderer --------- */
-
-const ExperienceSection = ({ data, colors }: { data: CVData; colors: ColorPalette }) => {
-  if (!data.experience || data.experience.length === 0) return null;
-
-  let currentHeader: string | null = null;
-
-  return (
-    <View>
-      <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.EXPERIENCE}</Text>
-      {data.experience.map((exp, idx) => {
-        const showHeader = exp.sectionHeader && exp.sectionHeader !== currentHeader;
-        if (showHeader) currentHeader = exp.sectionHeader!;
-
-        return (
-          <View key={idx}>
-            {showHeader && (
-              <Text style={[baseStyles.sectionHeader, { borderLeftColor: colors.primary }]}>
-                {exp.sectionHeader}
-              </Text>
-            )}
-            <View style={baseStyles.expBlock} break={idx === 0 ? false : exp.break}>
-              <View wrap={false}>
-                <View style={baseStyles.expHeaderRow}>
-                  <Text style={baseStyles.expRole}>{exp.role}</Text>
-                  <Text style={baseStyles.expDates}>{exp.dates}</Text>
-                </View>
-                <Text style={baseStyles.expCompany}>{exp.company}</Text>
-                {exp.client && <Text style={baseStyles.expClient}>Client: {exp.client}</Text>}
-                {exp.bulletPoints && exp.bulletPoints.length > 0 && (
-                  <View style={baseStyles.bulletRow}>
-                    <Text style={baseStyles.bulletPoint}>—</Text>
-                    <Text style={baseStyles.bulletText}>
-                      {renderBulletHtml(exp.bulletPoints[0], baseStyles.boldText)}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              {exp.bulletPoints &&
-                exp.bulletPoints.slice(1).map((bp, bidx) => (
-                  <View key={bidx + 1} style={baseStyles.bulletRow}>
-                    <Text style={baseStyles.bulletPoint}>—</Text>
-                    <Text style={baseStyles.bulletText}>
-                      {renderBulletHtml(bp, baseStyles.boldText)}
-                    </Text>
-                  </View>
-                ))}
-            </View>
-          </View>
-        );
-      })}
-    </View>
-  );
-};
+/* --------- Swiss Minimalist CV (formerly Minimalist) --------- */
 
 /* --------- Swiss Minimalist CV (formerly Minimalist) --------- */
 
 export const MinimalistCV = ({ data, colors }: { data: CVData; colors?: ColorPalette }) => {
   const c = colors || COLOR_THEMES[DEFAULT_THEME];
-  return (
-    <Document title="cv">
-      <Page size="A4" style={baseStyles.page}>
-        <DocumentHeader data={data} colors={c} />
 
-        {data.summary && (
-          <View>
-            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.PROFILE}</Text>
+  const orderedSectionIds = getOrderedSectionIds(data);
+
+  const renderSection = (sectionId: string) => {
+    switch (sectionId) {
+      case "summary":
+        if (!data.summary) return null;
+        const summaryLabel = data.sectionLabels?.summary || SECTION_LABELS.PROFILE;
+        return (
+          <View key="summary">
+            <Text style={baseStyles.sectionTitle}>{summaryLabel}</Text>
             <Text style={baseStyles.summaryText}>{data.summary}</Text>
           </View>
-        )}
-
-        <ExperienceSection data={data} colors={c} />
-
-        {data.skills && data.skills.length > 0 && (
-          <View>
-            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.SKILLS}</Text>
+        );
+      case "skills":
+        if (!data.skills || data.skills.length === 0) return null;
+        const skillsLabel = data.sectionLabels?.skills || SECTION_LABELS.SKILLS;
+        return (
+          <View key="skills">
+            <Text style={baseStyles.sectionTitle}>{skillsLabel}</Text>
             {data.skills.map((skill, idx) => (
               <View key={idx} style={baseStyles.skillRow} wrap={false}>
                 <Text style={baseStyles.skillName}>{skill.name}</Text>
@@ -310,11 +261,63 @@ export const MinimalistCV = ({ data, colors }: { data: CVData; colors?: ColorPal
               </View>
             ))}
           </View>
-        )}
+        );
+      case "experience":
+        if (!data.experience || data.experience.length === 0) return null;
+        const expLabel = data.sectionLabels?.experience || SECTION_LABELS.EXPERIENCE;
+        let currentHeader: string | null = null;
+        return (
+          <View key="experience">
+            <Text style={baseStyles.sectionTitle}>{expLabel}</Text>
+            {data.experience.map((exp, idx) => {
+              const showHeader = exp.sectionHeader && exp.sectionHeader !== currentHeader;
+              if (showHeader) currentHeader = exp.sectionHeader!;
 
-        {data.education && data.education.length > 0 && (
-          <View>
-            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.EDUCATION}</Text>
+              return (
+                <View key={idx}>
+                  {showHeader && (
+                    <Text style={[baseStyles.sectionHeader, { borderLeftColor: c.primary }]}>
+                      {exp.sectionHeader}
+                    </Text>
+                  )}
+                  <View style={baseStyles.expBlock} break={idx === 0 ? false : exp.break}>
+                    <View wrap={false}>
+                      <View style={baseStyles.expHeaderRow}>
+                        <Text style={baseStyles.expRole}>{exp.role}</Text>
+                        <Text style={baseStyles.expDates}>{exp.dates}</Text>
+                      </View>
+                      <Text style={baseStyles.expCompany}>{exp.company}</Text>
+                      {exp.client && <Text style={baseStyles.expClient}>Client: {exp.client}</Text>}
+                      {exp.bulletPoints && exp.bulletPoints.length > 0 && (
+                        <View style={baseStyles.bulletRow}>
+                          <Text style={baseStyles.bulletPoint}>—</Text>
+                          <Text style={baseStyles.bulletText}>
+                            {renderBulletHtml(exp.bulletPoints[0], baseStyles.boldText)}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    {exp.bulletPoints &&
+                      exp.bulletPoints.slice(1).map((bp, bidx) => (
+                        <View key={bidx + 1} style={baseStyles.bulletRow}>
+                          <Text style={baseStyles.bulletPoint}>—</Text>
+                          <Text style={baseStyles.bulletText}>
+                            {renderBulletHtml(bp, baseStyles.boldText)}
+                          </Text>
+                        </View>
+                      ))}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        );
+      case "education":
+        if (!data.education || data.education.length === 0) return null;
+        const eduLabel = data.sectionLabels?.education || SECTION_LABELS.EDUCATION;
+        return (
+          <View key="education">
+            <Text style={baseStyles.sectionTitle}>{eduLabel}</Text>
             {data.education.map((edu, idx) => (
               <View key={idx} style={baseStyles.eduBlock} wrap={false}>
                 <View style={baseStyles.eduHeaderRow}>
@@ -326,11 +329,13 @@ export const MinimalistCV = ({ data, colors }: { data: CVData; colors?: ColorPal
               </View>
             ))}
           </View>
-        )}
-
-        {data.certifications && data.certifications.length > 0 && (
-          <View>
-            <Text style={baseStyles.sectionTitle}>{SECTION_LABELS.CERTIFICATIONS}</Text>
+        );
+      case "certifications":
+        if (!data.certifications || data.certifications.length === 0) return null;
+        const certLabel = data.sectionLabels?.certifications || SECTION_LABELS.CERTIFICATIONS;
+        return (
+          <View key="certifications">
+            <Text style={baseStyles.sectionTitle}>{certLabel}</Text>
             {data.certifications.map((cert, idx) => (
               <View key={idx} style={baseStyles.certRow} wrap={false}>
                 <Text style={baseStyles.certName}>{cert.name}</Text>
@@ -338,14 +343,53 @@ export const MinimalistCV = ({ data, colors }: { data: CVData; colors?: ColorPal
               </View>
             ))}
           </View>
-        )}
-
-        {data.other && (
-          <View style={baseStyles.otherSection} wrap={false}>
-            <Text style={baseStyles.sectionTitle}>{data.other.label}</Text>
+        );
+      case "other":
+        if (!data.other) return null;
+        const otherLabel = data.sectionLabels?.other || data.other.label;
+        return (
+          <View key="other" style={baseStyles.otherSection} wrap={false}>
+            <Text style={baseStyles.sectionTitle}>{otherLabel}</Text>
             <Text style={baseStyles.summaryText}>{data.other.value}</Text>
           </View>
-        )}
+        );
+      default:
+        // Render custom sections
+        const customSec = data.customSections?.find((s) => s.id === sectionId);
+        if (customSec) {
+          if (
+            !customSec.content &&
+            (!customSec.bulletPoints || customSec.bulletPoints.length === 0)
+          )
+            return null;
+          return (
+            <View key={customSec.id}>
+              <Text style={baseStyles.sectionTitle}>{customSec.title}</Text>
+              {customSec.content && <Text style={baseStyles.summaryText}>{customSec.content}</Text>}
+              {customSec.bulletPoints && customSec.bulletPoints.length > 0 && (
+                <View style={{ marginTop: 4 }}>
+                  {customSec.bulletPoints.map((bp, bidx) => (
+                    <View key={bidx} style={baseStyles.bulletRow}>
+                      <Text style={baseStyles.bulletPoint}>—</Text>
+                      <Text style={baseStyles.bulletText}>
+                        {renderBulletHtml(bp, baseStyles.boldText)}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          );
+        }
+        return null;
+    }
+  };
+
+  return (
+    <Document title={`${data.name || "CV"} - CV`} author={data.name}>
+      <Page size="A4" style={baseStyles.page}>
+        <DocumentHeader data={data} colors={c} />
+        {orderedSectionIds.map((sectionId) => renderSection(sectionId))}
       </Page>
     </Document>
   );
@@ -364,7 +408,7 @@ export const MinimalistCoverLetter = ({
 }) => {
   const c = colors || COLOR_THEMES[DEFAULT_THEME];
   return (
-    <Document title="cover-letter">
+    <Document title={`${data.name || "Cover"} - Cover Letter`} author={data.name}>
       <Page size="A4" style={baseStyles.page}>
         <DocumentHeader data={data} colors={c} />
         <View style={{ marginTop: 40 }}>

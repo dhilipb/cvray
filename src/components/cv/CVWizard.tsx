@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import {
   Box,
   Paper,
@@ -13,7 +14,13 @@ import {
   CircularProgress,
   TextField,
   Grid,
+  LinearProgress,
+  Alert,
 } from "@mui/material";
+import {
+  FileDownload as FileDownloadIcon,
+  FileUpload as FileUploadIcon,
+} from "@mui/icons-material";
 import { CVData } from "@/lib/types";
 import { PersonalInfoStep } from "./wizard/PersonalInfoStep";
 import { SummaryStep } from "./wizard/SummaryStep";
@@ -23,6 +30,16 @@ import { EducationStep } from "./wizard/EducationStep";
 import { CertificationsStep } from "./wizard/CertificationsStep";
 import { CoverLetterStep } from "./wizard/CoverLetterStep";
 import { OtherInfoStep } from "./wizard/OtherInfoStep";
+import { normalizeCV, parseCV, validateStep, StepErrors } from "./wizard/utils";
+
+const PreviewStep = dynamic(() => import("./wizard/PreviewStep"), {
+  ssr: false,
+  loading: () => (
+    <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+      <CircularProgress />
+    </Box>
+  ),
+});
 
 /* --------- Types --------- */
 
@@ -37,6 +54,8 @@ interface Props {
   saving?: boolean;
   title?: string;
   showMetadataStep?: boolean;
+  /** Called with the latest data after every change (e.g. to persist a draft). */
+  onChange?: (data: WizardData) => void;
 }
 
 /* --------- Metadata Step --------- */
@@ -44,9 +63,11 @@ interface Props {
 function MetadataStep({
   data,
   updateData,
+  errors,
 }: {
   data: WizardData;
   updateData: (data: Partial<WizardData>) => void;
+  errors: StepErrors;
 }) {
   return (
     <Box>
@@ -59,9 +80,11 @@ function MetadataStep({
             label="Internal Profile Name"
             fullWidth
             size="small"
+            required
             value={data.profileName || ""}
             onChange={(e) => updateData({ profileName: e.target.value })}
-            helperText="Visible only to you in the dashboard"
+            error={!!errors.profileName}
+            helperText={errors.profileName || "Visible only to you in the dashboard"}
           />
         </Grid>
         <Grid size={{ xs: 12 }}>
@@ -89,9 +112,17 @@ export default function CVWizard({
   saving = false,
   title = "CV Wizard",
   showMetadataStep = false,
+  onChange,
 }: Props) {
   const [activeStep, setActiveStep] = useState(0);
-  const [data, setData] = useState<WizardData>(initialData);
+  // Parents remount (via `key`) to replace data. The old initialData->state sync effect
+  // reverted any edits typed while a save was in flight.
+  const [data, setData] = useState<WizardData>(() => normalizeCV(initialData));
+  const [showErrors, setShowErrors] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const prevStep = useRef(activeStep);
 
   const steps = [
     ...(showMetadataStep ? ["Metadata"] : []),
@@ -105,12 +136,23 @@ export default function CVWizard({
     "Other Details",
     "Preview",
   ];
+  const isLastStep = activeStep === steps.length - 1;
+  const errors = showErrors ? validateStep(steps[activeStep], data) : {};
 
   useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
+    onChange?.(data);
+  }, [data, onChange]);
+
+  // Move focus to the new step so keyboard/screen-reader users land on its content.
+  useEffect(() => {
+    if (prevStep.current !== activeStep) contentRef.current?.focus();
+    prevStep.current = activeStep;
+  }, [activeStep]);
+
+  const hasErrors = (step: string) => Object.keys(validateStep(step, data)).length > 0;
 
   const handleNext = () => {
+    if (hasErrors(steps[activeStep])) return setShowErrors(true);
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -123,57 +165,67 @@ export default function CVWizard({
   };
 
   const handleSave = async () => {
-    if (onSave) {
-      await onSave(data);
+    if (!onSave) return;
+    const invalid = steps.findIndex(hasErrors);
+    if (invalid >= 0) {
+      setShowErrors(true);
+      setActiveStep(invalid);
+      return;
+    }
+    await onSave(data);
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${(data.name || "cv").trim().replace(/\s+/g, "-").toLowerCase()}-data.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-importing the same file
+    if (!file) return;
+    try {
+      const imported = parseCV(await file.text());
+      // Keep profile metadata; replace CV content.
+      setData((prev) => ({
+        ...imported,
+        profileName: prev.profileName,
+        profileDescription: prev.profileDescription,
+      }));
+      setImportError(null);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : "Could not read file");
     }
   };
 
-  const renderStepContent = (stepIndex: number) => {
-    // Adjust index based on showMetadataStep
-    let currentStep = stepIndex;
-    if (showMetadataStep) {
-      if (stepIndex === 0) return <MetadataStep data={data} updateData={updateData} />;
-      currentStep = stepIndex - 1;
-    }
-
-    switch (currentStep) {
-      case 0:
-        return <PersonalInfoStep data={data} updateData={updateData} />;
-      case 1:
-        return <SummaryStep data={data} updateData={updateData} />;
-      case 2:
-        return <SkillsStep data={data} updateData={updateData} />;
-      case 3:
-        return <ExperienceStep data={data} updateData={updateData} />;
-      case 4:
-        return <EducationStep data={data} updateData={updateData} />;
-      case 5:
-        return <CertificationsStep data={data} updateData={updateData} />;
-      case 6:
-        return <CoverLetterStep data={data} updateData={updateData} />;
-      case 7:
-        return <OtherInfoStep data={data} updateData={updateData} />;
-      case 8:
-        return (
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              Preview JSON
-            </Typography>
-            <Paper
-              sx={{
-                p: 2,
-                bgcolor: "background.default",
-                overflow: "auto",
-                maxHeight: "400px",
-                border: "1px solid rgba(255,255,255,0.05)",
-              }}
-            >
-              <pre style={{ margin: 0, fontSize: "0.8rem", color: "#10b981" }}>
-                {JSON.stringify(data, null, 2)}
-              </pre>
-            </Paper>
-          </Box>
-        );
+  const renderStepContent = () => {
+    const props = { data, updateData };
+    switch (steps[activeStep]) {
+      case "Metadata":
+        return <MetadataStep {...props} errors={errors} />;
+      case "Personal Info":
+        return <PersonalInfoStep {...props} errors={errors} />;
+      case "Summary":
+        return <SummaryStep {...props} />;
+      case "Skills":
+        return <SkillsStep {...props} />;
+      case "Experience":
+        return <ExperienceStep {...props} />;
+      case "Education":
+        return <EducationStep {...props} />;
+      case "Certifications":
+        return <CertificationsStep {...props} />;
+      case "Cover Letter":
+        return <CoverLetterStep {...props} />;
+      case "Other Details":
+        return <OtherInfoStep {...props} />;
+      case "Preview":
+        return <PreviewStep data={data} />;
       default:
         return <Typography>Unknown Step</Typography>;
     }
@@ -181,24 +233,60 @@ export default function CVWizard({
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-        <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
-          {title}
-        </Typography>
-        {onSave && (
-          <Button
-            variant="contained"
-            color="success"
-            onClick={handleSave}
-            disabled={saving}
-            startIcon={saving ? <CircularProgress size={20} color="inherit" /> : null}
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 1,
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1.5,
+        }}
+      >
+        {title && (
+          <Typography variant="h5" component="h1" sx={{ fontWeight: 700 }}>
+            {title}
+          </Typography>
         )}
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, ml: "auto" }}>
+          <Button
+            size="small"
+            startIcon={<FileUploadIcon />}
+            onClick={() => fileRef.current?.click()}
+          >
+            Import JSON
+          </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={handleImport}
+          />
+          <Button size="small" startIcon={<FileDownloadIcon />} onClick={handleExport}>
+            Export JSON
+          </Button>
+          {onSave && (
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleSave}
+              disabled={saving}
+              startIcon={saving ? <CircularProgress size={20} color="inherit" /> : null}
+            >
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          )}
+        </Box>
       </Box>
 
-      <Paper sx={{ p: { xs: 1.5, md: 3 }, mt: 1.5 }} elevation={3}>
+      {importError && (
+        <Alert severity="error" onClose={() => setImportError(null)} sx={{ mb: 1.5 }}>
+          Import failed: {importError}
+        </Alert>
+      )}
+
+      <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, borderRadius: 2 }}>
         <Stepper
           nonLinear
           activeStep={activeStep}
@@ -218,57 +306,51 @@ export default function CVWizard({
           ))}
         </Stepper>
 
-        <Box sx={{ display: { xs: "block", md: "none" }, mb: 2, textAlign: "center" }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        <Box sx={{ display: { xs: "block", md: "none" }, mb: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
             Step {activeStep + 1} of {steps.length}: {steps[activeStep]}
           </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={((activeStep + 1) / steps.length) * 100}
+            aria-label="Wizard progress"
+            sx={{ borderRadius: 1 }}
+          />
         </Box>
 
         <Divider sx={{ mb: 2.5 }} />
 
-        <Box sx={{ minHeight: "300px" }}>{renderStepContent(activeStep)}</Box>
+        <Box
+          ref={contentRef}
+          tabIndex={-1}
+          role="region"
+          aria-label={steps[activeStep]}
+          sx={{ minHeight: 300, outline: "none" }}
+        >
+          {renderStepContent()}
+        </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, mt: 3 }}>
           <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined" size="small">
             Back
           </Button>
-          <Box>
-            {activeStep === steps.length - 1 ? (
-              <Box sx={{ display: "flex", gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => {
-                    const blob = new Blob([JSON.stringify(data, null, 2)], {
-                      type: "application/json",
-                    });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.download = "cv-data.json";
-                    link.click();
-                  }}
-                >
-                  Download JSON
-                </Button>
-                {onSave && (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    size="small"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Save Profile"}
-                  </Button>
-                )}
-              </Box>
-            ) : (
-              <Button variant="contained" color="primary" size="small" onClick={handleNext}>
-                Next
+          {!isLastStep ? (
+            <Button variant="contained" color="primary" size="small" onClick={handleNext}>
+              Next
+            </Button>
+          ) : (
+            onSave && (
+              <Button
+                variant="contained"
+                color="success"
+                size="small"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save Profile"}
               </Button>
-            )}
-          </Box>
+            )
+          )}
         </Box>
       </Paper>
     </Box>

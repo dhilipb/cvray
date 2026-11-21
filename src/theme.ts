@@ -53,6 +53,22 @@ const theme = createTheme({
         },
       },
     },
+    // Solid surfaces for overlays: translucent paper hurts legibility over page content
+    MuiDialog: {
+      styleOverrides: {
+        paper: { backgroundColor: "#18181b", backgroundImage: "none", borderRadius: 12 },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: { backgroundColor: "#18181b", backgroundImage: "none" },
+      },
+    },
+    MuiSkeleton: {
+      styleOverrides: {
+        root: { backgroundColor: "rgba(255, 255, 255, 0.06)" },
+      },
+    },
     MuiCard: {
       styleOverrides: {
         root: {

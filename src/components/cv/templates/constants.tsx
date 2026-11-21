@@ -17,6 +17,8 @@ export const SECTION_LABELS = {
   CORE_COMPETENCIES: "Core Competencies",
 };
 
+export { DEFAULT_SECTIONS_ORDER, getOrderedSectionIds } from "@/lib/cv/sections";
+
 /* --------- Shared Utilities --------- */
 
 /**
@@ -24,7 +26,7 @@ export const SECTION_LABELS = {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const renderBulletHtml = (text: string, boldStyle: any) => {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
+  const parts = (text || "").split(/(\*\*.*?\*\*)/g);
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
