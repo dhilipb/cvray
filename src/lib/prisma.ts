@@ -5,7 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const prismaClientSingleton = () => {
   const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL is not set");
+  // No throw when unset: `next build` imports this without runtime env; `prisma db push` at startup fails loudly instead
   const adapter = new PrismaPg({ connectionString });
   return new PrismaClient({
     adapter,

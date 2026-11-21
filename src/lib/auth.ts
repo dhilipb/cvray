@@ -1,6 +1,6 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { timingSafeEqual } from "crypto";
 import { NextAuthOptions, Session, getServerSession } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 
 /* --------- Auth Configuration --------- */
@@ -17,11 +17,26 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    // Single fixed account: LOGIN_EMAIL / LOGIN_PASSWORD from the environment
+    CredentialsProvider({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = process.env.LOGIN_EMAIL;
+        const password = process.env.LOGIN_PASSWORD;
+        if (!email || !password || !credentials) return null;
+        if (!safeEqual(credentials.email.trim().toLowerCase(), email.toLowerCase())) return null;
+        if (!safeEqual(credentials.password, password)) return null;
+        const user = await prisma.user.upsert({
+          where: { email },
+          update: {},
+          create: { email, name: email.split("@")[0] },
+        });
+        return { id: user.id, name: user.name, email: user.email };
+      },
     }),
   ],
   session: {
@@ -44,6 +59,12 @@ export const authOptions: NextAuthOptions = {
   // debug logs tokens and secrets; never enable in production
   debug: process.env.NODE_ENV === "development",
 };
+
+function safeEqual(a: string, b: string): boolean {
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
 
 /* --------- Temporary auth bypass --------- */
 

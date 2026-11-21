@@ -37,7 +37,7 @@ export const UserMenu = () => {
   };
 
   const handleSignIn = () => {
-    signIn("google");
+    signIn();
   };
 
   if (status === "loading") {
